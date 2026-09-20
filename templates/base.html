@@ -1,0 +1,822 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% block title %}SmartBilling{% endblock %}
+    </title>
+
+    <!-- Font Awesome -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f7fb;
+            color: #111827;
+        }
+
+        /* =====================================
+           SIDEBAR
+        ===================================== */
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100vh;
+            background: #111827;
+            color: white;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .brand {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            padding: 0 22px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .brand-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 9px;
+            background: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 11px;
+            font-size: 17px;
+        }
+
+        .brand-text {
+            font-size: 19px;
+            font-weight: 700;
+        }
+
+        .brand-text span {
+            color: #60a5fa;
+        }
+
+        /* =====================================
+           NAVIGATION
+        ===================================== */
+
+        .nav-section {
+            padding: 22px 14px 8px;
+        }
+
+        .nav-title {
+            color: #6b7280;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0 10px 9px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 12px;
+            margin-bottom: 4px;
+            border-radius: 8px;
+            color: #d1d5db;
+            text-decoration: none;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+
+        .nav-link i {
+            width: 18px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .nav-link:hover {
+            background: #1f2937;
+            color: white;
+        }
+
+        .nav-link.active {
+            background: #2563eb;
+            color: white;
+        }
+
+        /* =====================================
+           SIDEBAR USER
+        ===================================== */
+
+        .sidebar-bottom {
+            position: absolute;
+            left: 14px;
+            right: 14px;
+            bottom: 18px;
+        }
+
+        .user-box {
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding-top: 15px;
+            margin-bottom: 10px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 6px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 13px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .user-details {
+            min-width: 0;
+        }
+
+        .user-name {
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-role {
+            color: #9ca3af;
+            font-size: 11px;
+            margin-top: 2px;
+        }
+
+        /* =====================================
+           LOGOUT
+        ===================================== */
+
+        .logout-form {
+            margin: 0;
+        }
+
+        .logout-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: #d1d5db;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+            text-align: left;
+        }
+
+        .logout-btn i {
+            width: 18px;
+            text-align: center;
+        }
+
+        .logout-btn:hover {
+            background: #1f2937;
+            color: #f87171;
+        }
+
+        /* =====================================
+           MAIN AREA
+        ===================================== */
+
+        .main-wrapper {
+            margin-left: 250px;
+            min-height: 100vh;
+        }
+
+        /* =====================================
+           TOPBAR
+        ===================================== */
+
+        .topbar {
+            height: 70px;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+
+        .page-heading {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .page-heading h1 {
+            font-size: 20px;
+            color: #111827;
+            font-weight: 700;
+        }
+
+        .page-heading p {
+            margin-top: 3px;
+            color: #9ca3af;
+            font-size: 11px;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .topbar-user {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: #374151;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .topbar-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #eff6ff;
+            color: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        /* =====================================
+           CONTENT
+        ===================================== */
+
+        .content {
+            padding: 30px;
+        }
+
+        /* =====================================
+           COMMON BUTTONS
+        ===================================== */
+
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        /* =====================================
+           MOBILE MENU
+        ===================================== */
+
+        .mobile-menu {
+            display: none;
+            border: none;
+            background: transparent;
+            font-size: 20px;
+            color: #374151;
+            cursor: pointer;
+        }
+
+        /* =====================================
+           SCROLLBAR
+        ===================================== */
+
+        .sidebar::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: #111827;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 10px;
+        }
+
+        /* =====================================
+           RESPONSIVE
+        ===================================== */
+
+        @media (max-width: 900px) {
+
+            .sidebar {
+                width: 220px;
+            }
+
+            .main-wrapper {
+                margin-left: 220px;
+            }
+
+            .topbar {
+                padding: 0 20px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+        }
+
+        @media (max-width: 700px) {
+
+            .sidebar {
+                left: -250px;
+                width: 250px;
+                transition: 0.25s;
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+            }
+
+            .mobile-menu {
+                display: block;
+            }
+
+            .topbar {
+                padding: 0 16px;
+            }
+
+            .page-heading h1 {
+                font-size: 18px;
+            }
+
+            .page-heading p {
+                display: none;
+            }
+
+            .topbar-user span {
+                display: none;
+            }
+
+            .content {
+                padding: 18px;
+            }
+
+        }
+
+    </style>
+
+    {% block extra_css %}{% endblock %}
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================
+     SIDEBAR
+===================================== -->
+
+<aside class="sidebar" id="sidebar">
+
+
+    <!-- BRAND -->
+
+    <div class="brand">
+
+        <div class="brand-icon">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+        </div>
+
+        <div class="brand-text">
+            Smart<span>Billing</span>
+        </div>
+
+    </div>
+
+
+    <!-- MAIN MENU -->
+
+    <div class="nav-section">
+
+        <div class="nav-title">
+            Main Menu
+        </div>
+
+
+        <!-- Dashboard -->
+
+        <a
+            href="{% url 'dashboard' %}"
+            class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+        >
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Dashboard</span>
+        </a>
+
+
+        <!-- Products -->
+
+        <a
+            href="{% url 'products' %}"
+            class="nav-link {% if request.resolver_match.url_name == 'products' or request.resolver_match.url_name == 'add_product' or request.resolver_match.url_name == 'edit_product' %}active{% endif %}"
+        >
+            <i class="fa-solid fa-box"></i>
+            <span>Products</span>
+        </a>
+
+
+        <!-- Customers -->
+
+        <a
+            href="{% url 'customers' %}"
+            class="nav-link {% if request.resolver_match.url_name == 'customers' or request.resolver_match.url_name == 'add_customer' or request.resolver_match.url_name == 'edit_customer' %}active{% endif %}"
+        >
+            <i class="fa-solid fa-users"></i>
+            <span>Customers</span>
+        </a>
+
+
+        <!-- Invoices -->
+
+        <a
+            href="{% url 'invoices' %}"
+            class="nav-link {% if request.resolver_match.url_name == 'invoices' or request.resolver_match.url_name == 'add_invoice' or request.resolver_match.url_name == 'invoice_detail' %}active{% endif %}"
+        >
+            <i class="fa-solid fa-file-invoice"></i>
+            <span>Invoices</span>
+        </a>
+
+        <a  href="{% url 'sales_history' %}"
+            class="nav-link {% if request.resolver_match.url_name == 'sales_history' %}active{% endif %}"
+        >
+            <i class="fa-solid fa-chart-column"></i>
+            <span>Sales History</span>
+        </a>
+
+        <!-- Payments -->
+
+        <a
+            href="{% url 'payments' %}"
+            class="nav-link {% if request.resolver_match.url_name == 'payments' or request.resolver_match.url_name == 'add_payment' %}active{% endif %}"
+        >
+            <i class="fa-solid fa-credit-card"></i>
+            <span>Payments</span>
+        </a>
+
+
+        <!-- Reports -->
+
+        <a
+            href="{% url 'reports' %}"
+            class="nav-link {% if request.resolver_match.url_name == 'reports' %}active{% endif %}"
+        >
+            <i class="fa-solid fa-chart-column"></i>
+            <span>Reports</span>
+        </a>
+
+    </div>
+
+
+    <!-- ACCOUNT MENU -->
+
+    <div class="nav-section">
+
+        <div class="nav-title">
+            Account
+        </div>
+
+
+        <!-- My Profile -->
+
+        <a
+            href="{% url 'profile' %}"
+            class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}"
+        >
+            <i class="fa-solid fa-user"></i>
+            <span>My Profile</span>
+        </a>
+
+
+        <!-- Settings -->
+
+        <a
+            href="{% url 'settings' %}"
+            class="nav-link {% if request.resolver_match.url_name == 'settings' %}active{% endif %}"
+        >
+            <i class="fa-solid fa-gear"></i>
+            <span>Settings</span>
+        </a>
+
+    </div>
+
+
+    <!-- USER / LOGOUT -->
+
+    {% if user.is_authenticated %}
+
+    <div class="sidebar-bottom">
+
+
+        <div class="user-box">
+
+            <div class="user-info">
+
+                <div class="user-avatar">
+
+                    {% if user.first_name %}
+
+                        {{ user.first_name|first|upper }}
+
+                    {% else %}
+
+                        {{ user.username|first|upper }}
+
+                    {% endif %}
+
+                </div>
+
+
+                <div class="user-details">
+
+                    <div class="user-name">
+
+                        {% if user.first_name %}
+
+                            {{ user.first_name }} {{ user.last_name }}
+
+                        {% else %}
+
+                            {{ user.username }}
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="user-role">
+                        Administrator
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- POST LOGOUT -->
+
+        <form
+            method="POST"
+            action="{% url 'logout' %}"
+            class="logout-form"
+        >
+
+            {% csrf_token %}
+
+            <button
+                type="submit"
+                class="logout-btn"
+            >
+
+                <i class="fa-solid fa-right-from-bracket"></i>
+
+                <span>Logout</span>
+
+            </button>
+
+        </form>
+
+
+    </div>
+
+    {% endif %}
+
+
+</aside>
+
+
+<!-- =====================================
+     MAIN WRAPPER
+===================================== -->
+
+<div class="main-wrapper">
+
+
+    <!-- TOPBAR -->
+
+    <header class="topbar">
+
+
+        <div class="page-heading">
+
+
+            <!-- MOBILE MENU -->
+
+            <button
+                type="button"
+                class="mobile-menu"
+                id="mobileMenu"
+            >
+
+                <i class="fa-solid fa-bars"></i>
+
+            </button>
+
+
+            <div>
+
+                <h1>
+
+                    {% block page_title %}
+                        Dashboard
+                    {% endblock %}
+
+                </h1>
+
+
+                <p>
+                    SmartBilling Management System
+                </p>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- TOPBAR USER -->
+
+        {% if user.is_authenticated %}
+
+        <div class="topbar-right">
+
+            <div class="topbar-user">
+
+
+                <div class="topbar-avatar">
+
+                    {% if user.first_name %}
+
+                        {{ user.first_name|first|upper }}
+
+                    {% else %}
+
+                        {{ user.username|first|upper }}
+
+                    {% endif %}
+
+                </div>
+
+
+                <span>
+
+                    {% if user.first_name %}
+
+                        {{ user.first_name }}
+
+                    {% else %}
+
+                        {{ user.username }}
+
+                    {% endif %}
+
+                </span>
+
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+
+    </header>
+
+
+    <!-- PAGE CONTENT -->
+
+    <main class="content">
+
+        {% block content %}
+
+        {% endblock %}
+
+    </main>
+
+
+</div>
+
+
+<!-- =====================================
+     MOBILE SIDEBAR JAVASCRIPT
+===================================== -->
+
+<script>
+
+    const mobileMenu = document.getElementById("mobileMenu");
+
+    const sidebar = document.getElementById("sidebar");
+
+
+    if (mobileMenu) {
+
+        mobileMenu.addEventListener("click", function () {
+
+            sidebar.classList.toggle("open");
+
+        });
+
+    }
+
+
+    document.querySelectorAll(".nav-link").forEach(function(link) {
+
+        link.addEventListener("click", function() {
+
+            if (window.innerWidth <= 700) {
+
+                sidebar.classList.remove("open");
+
+            }
+
+        });
+
+    });
+
+</script>
+
+
+{% block extra_js %}{% endblock %}
+
+
+</body>
+
+</html>

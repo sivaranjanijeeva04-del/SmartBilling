@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if product %}Edit Product{% else %}Add Product{% endif %} - SmartBilling
+{% endblock %}
+
+{% block page_title %}
+    {% if product %}Edit Product{% else %}Add Product{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .form-wrapper {
+        max-width: 850px;
+        margin: 0 auto;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 14px;
+        padding: 30px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    }
+
+    .form-header {
+        margin-bottom: 25px;
+    }
+
+    .form-header h2 {
+        font-size: 22px;
+        color: #111827;
+        margin-bottom: 6px;
+    }
+
+    .form-header p {
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    .error-box {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #b91c1c;
+        padding: 12px 15px;
+        border-radius: 8px;
+        margin-bottom: 22px;
+        font-size: 14px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 5px;
+    }
+
+    .form-group.full {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 8px;
+    }
+
+    .required {
+        color: #dc2626;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 14px;
+        outline: none;
+        transition: 0.2s;
+        background: white;
+    }
+
+    .form-control:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .help-text {
+        margin-top: 6px;
+        font-size: 11px;
+        color: #9ca3af;
+    }
+
+    .button-group {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 28px;
+        padding-top: 22px;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .btn {
+        border: none;
+        padding: 11px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-primary {
+        background: #2563eb;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #1d4ed8;
+    }
+
+    .btn-secondary {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .btn-secondary:hover {
+        background: #e5e7eb;
+    }
+
+    @media (max-width: 600px) {
+        .form-card {
+            padding: 20px;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group.full {
+            grid-column: auto;
+        }
+
+        .button-group {
+            flex-direction: column;
+        }
+
+        .btn {
+            justify-content: center;
+        }
+    }
+</style>
+
+
+<div class="form-wrapper">
+
+    <div class="form-card">
+
+        <div class="form-header">
+
+            <h2>
+                {% if product %}
+                    Edit Product
+                {% else %}
+                    Add New Product
+                {% endif %}
+            </h2>
+
+            <p>
+                {% if product %}
+                    Update product information and inventory details.
+                {% else %}
+                    Add a new product to your SmartBilling inventory.
+                {% endif %}
+            </p>
+
+        </div>
+
+
+        {% if error %}
+
+            <div class="error-box">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                {{ error }}
+            </div>
+
+        {% endif %}
+
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <div class="form-grid">
+
+                <!-- PRODUCT NAME -->
+
+                <div class="form-group">
+
+                    <label for="name">
+                        Product Name
+                        <span class="required">*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        name="name"
+                        id="name"
+                        class="form-control"
+                        placeholder="Enter product name"
+                        value="{% if form_data %}{{ form_data.name }}{% elif product %}{{ product.name }}{% endif %}"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- CATEGORY -->
+
+                <div class="form-group">
+
+                    <label for="category">
+                        Category
+                        <span class="required">*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        name="category"
+                        id="category"
+                        class="form-control"
+                        placeholder="Example: Electronics"
+                        value="{% if form_data %}{{ form_data.category }}{% elif product %}{{ product.category }}{% endif %}"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- PRICE -->
+
+                <div class="form-group">
+
+                    <label for="price">
+                        Price
+                        <span class="required">*</span>
+                    </label>
+
+                    <input
+                        type="number"
+                        name="price"
+                        id="price"
+                        class="form-control"
+                        placeholder="0.00"
+                        min="0.01"
+                        step="0.01"
+                        value="{% if form_data %}{{ form_data.price }}{% elif product %}{{ product.price }}{% endif %}"
+                        required
+                    >
+
+                    <div class="help-text">
+                        Enter the selling price in ₹.
+                    </div>
+
+                </div>
+
+
+                <!-- STOCK -->
+
+                <div class="form-group">
+
+                    <label for="stock">
+                        Stock Quantity
+                        <span class="required">*</span>
+                    </label>
+
+                    <input
+                        type="number"
+                        name="stock"
+                        id="stock"
+                        class="form-control"
+                        placeholder="0"
+                        min="0"
+                        value="{% if form_data %}{{ form_data.stock }}{% elif product %}{{ product.stock }}{% endif %}"
+                        required
+                    >
+
+                    <div class="help-text">
+                        Enter the available inventory quantity.
+                    </div>
+
+                </div>
+
+
+                <!-- DESCRIPTION -->
+
+                <div class="form-group full">
+
+                    <label for="description">
+                        Description
+                    </label>
+
+                    <textarea
+                        name="description"
+                        id="description"
+                        class="form-control"
+                        placeholder="Enter product description..."
+                    >{% if form_data %}{{ form_data.description }}{% elif product %}{{ product.description }}{% endif %}</textarea>
+
+                </div>
+
+            </div>
+
+
+            <!-- BUTTONS -->
+
+            <div class="button-group">
+
+                <a
+                    href="{% url 'products' %}"
+                    class="btn btn-secondary"
+                >
+                    <i class="fa-solid fa-arrow-left"></i>
+                    Cancel
+                </a>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+
+                    {% if product %}
+
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        Update Product
+
+                    {% else %}
+
+                        <i class="fa-solid fa-plus"></i>
+                        Add Product
+
+                    {% endif %}
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

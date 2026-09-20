@@ -1,0 +1,804 @@
+{% extends "base.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block page_title %}Settings{% endblock %}
+
+{% block content %}
+
+<div class="settings-page">
+
+    <!-- Page Header -->
+
+    <div class="page-header">
+
+        <div>
+            <h1>Settings</h1>
+
+            <p>
+                Manage your company details and account settings.
+            </p>
+        </div>
+
+    </div>
+
+
+    <!-- Success Message -->
+
+    {% if success %}
+
+    <div class="alert alert-success">
+
+        <i class="fa-solid fa-circle-check"></i>
+
+        <span>{{ success }}</span>
+
+    </div>
+
+    {% endif %}
+
+
+    <!-- Error Message -->
+
+    {% if error %}
+
+    <div class="alert alert-error">
+
+        <i class="fa-solid fa-circle-exclamation"></i>
+
+        <span>{{ error }}</span>
+
+    </div>
+
+    {% endif %}
+
+
+    <!-- Company Information -->
+
+    <div class="settings-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon company-icon">
+                <i class="fa-solid fa-building"></i>
+            </div>
+
+            <div>
+                <h2>Company Information</h2>
+
+                <p>
+                    Update the business information displayed on invoices.
+                </p>
+            </div>
+
+        </div>
+
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+
+            <div class="form-grid">
+
+                <!-- Company Name -->
+
+                <div class="form-group full-width">
+
+                    <label for="company_name">
+                        Company Name
+                        <span class="required">*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="company_name"
+                        name="company_name"
+                        value="{{ company.company_name }}"
+                        class="form-control"
+                        placeholder="Enter company name"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- Phone -->
+
+                <div class="form-group">
+
+                    <label for="company_phone">
+                        Phone Number
+                    </label>
+
+                    <input
+                        type="text"
+                        id="company_phone"
+                        name="company_phone"
+                        value="{{ company.phone }}"
+                        class="form-control"
+                        placeholder="Enter phone number"
+                    >
+
+                </div>
+
+
+                <!-- Email -->
+
+                <div class="form-group">
+
+                    <label for="company_email">
+                        Email Address
+                    </label>
+
+                    <input
+                        type="email"
+                        id="company_email"
+                        name="company_email"
+                        value="{{ company.email }}"
+                        class="form-control"
+                        placeholder="Enter company email"
+                    >
+
+                </div>
+
+
+                <!-- GST -->
+
+                <div class="form-group">
+
+                    <label for="gst_number">
+                        GST Number
+                    </label>
+
+                    <input
+                        type="text"
+                        id="gst_number"
+                        name="gst_number"
+                        value="{{ company.gst_number }}"
+                        class="form-control"
+                        placeholder="Enter GST number"
+                    >
+
+                </div>
+
+
+                <!-- Address -->
+
+                <div class="form-group full-width">
+
+                    <label for="company_address">
+                        Business Address
+                    </label>
+
+                    <textarea
+                        id="company_address"
+                        name="company_address"
+                        class="form-control textarea-control"
+                        placeholder="Enter complete business address"
+                    >{{ company.address }}</textarea>
+
+                </div>
+
+            </div>
+
+
+            <!-- Save Button -->
+
+            <div class="form-actions">
+
+                <button
+                    type="submit"
+                    class="save-btn"
+                >
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    Save Company Details
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- Account Information -->
+
+    <div class="settings-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon account-icon">
+                <i class="fa-solid fa-user-circle"></i>
+            </div>
+
+            <div>
+                <h2>Account Information</h2>
+
+                <p>
+                    Details of the currently logged-in account.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="account-grid">
+
+            <!-- Username -->
+
+            <div class="account-item">
+
+                <span>Username</span>
+
+                <strong>
+                    {{ request.user.username }}
+                </strong>
+
+            </div>
+
+
+            <!-- Email -->
+
+            <div class="account-item">
+
+                <span>Email Address</span>
+
+                <strong>
+                    {% if request.user.email %}
+                        {{ request.user.email }}
+                    {% else %}
+                        Not provided
+                    {% endif %}
+                </strong>
+
+            </div>
+
+
+            <!-- First Name -->
+
+            <div class="account-item">
+
+                <span>First Name</span>
+
+                <strong>
+                    {% if request.user.first_name %}
+                        {{ request.user.first_name }}
+                    {% else %}
+                        Not provided
+                    {% endif %}
+                </strong>
+
+            </div>
+
+
+            <!-- Last Name -->
+
+            <div class="account-item">
+
+                <span>Last Name</span>
+
+                <strong>
+                    {% if request.user.last_name %}
+                        {{ request.user.last_name }}
+                    {% else %}
+                        Not provided
+                    {% endif %}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- Account Actions -->
+
+        <div class="account-actions">
+
+            <a
+                href="{% url 'profile' %}"
+                class="profile-btn"
+            >
+                <i class="fa-solid fa-user-pen"></i>
+                Edit Profile
+            </a>
+
+
+            <a
+                href="{% url 'change_password' %}"
+                class="password-btn"
+            >
+                <i class="fa-solid fa-key"></i>
+                Change Password
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- Application Information -->
+
+    <div class="settings-card">
+
+        <div class="card-heading">
+
+            <div class="heading-icon app-icon">
+                <i class="fa-solid fa-circle-info"></i>
+            </div>
+
+            <div>
+                <h2>Application Information</h2>
+
+                <p>
+                    Information about your SmartBilling application.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="application-grid">
+
+            <!-- Application -->
+
+            <div class="application-item">
+
+                <span>Application</span>
+
+                <strong>
+                    SmartBilling
+                </strong>
+
+            </div>
+
+
+            <!-- Platform -->
+
+            <div class="application-item">
+
+                <span>Platform</span>
+
+                <strong>
+                    Django + Python
+                </strong>
+
+            </div>
+
+
+            <!-- Database -->
+
+            <div class="application-item">
+
+                <span>Database</span>
+
+                <strong>
+                    SQLite
+                </strong>
+
+            </div>
+
+
+            <!-- Version -->
+
+            <div class="application-item">
+
+                <span>Version</span>
+
+                <strong>
+                    1.0.0
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="application-note">
+
+            <i class="fa-solid fa-shield-halved"></i>
+
+            <p>
+                Keep your account credentials secure and make sure
+                your company information is up to date before
+                generating invoices.
+            </p>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<style>
+
+/* ==================================================
+   PAGE
+================================================== */
+
+.settings-page {
+    max-width: 1100px;
+    margin: 0 auto 30px;
+}
+
+
+/* ==================================================
+   HEADER
+================================================== */
+
+.page-header {
+    margin-bottom: 24px;
+}
+
+.page-header h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 28px;
+}
+
+.page-header p {
+    margin: 6px 0 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+
+/* ==================================================
+   ALERTS
+================================================== */
+
+.alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 15px;
+    border-radius: 9px;
+    margin-bottom: 20px;
+    font-size: 13px;
+}
+
+.alert-success {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #15803d;
+}
+
+.alert-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+}
+
+
+/* ==================================================
+   SETTINGS CARD
+================================================== */
+
+.settings-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 15px;
+    padding: 27px;
+    margin-bottom: 20px;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, .04);
+}
+
+
+/* ==================================================
+   CARD HEADING
+================================================== */
+
+.card-heading {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    margin-bottom: 24px;
+}
+
+.heading-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.company-icon {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.account-icon {
+    background: #f5f3ff;
+    color: #7c3aed;
+}
+
+.app-icon {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.card-heading h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 18px;
+}
+
+.card-heading p {
+    margin: 4px 0 0;
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+
+/* ==================================================
+   FORM
+================================================== */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 7px;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.required {
+    color: #dc2626;
+}
+
+.form-control {
+    width: 100%;
+    height: 45px;
+    box-sizing: border-box;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0 13px;
+    background: white;
+    color: #334155;
+    font-size: 13px;
+    outline: none;
+    transition: .2s;
+}
+
+.textarea-control {
+    height: 105px;
+    padding: 12px 13px;
+    resize: vertical;
+}
+
+.form-control:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .10);
+}
+
+
+/* ==================================================
+   FORM ACTION
+================================================== */
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 22px;
+    margin-top: 22px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.save-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 18px;
+    border: none;
+    border-radius: 8px;
+    background: #2563eb;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.save-btn:hover {
+    background: #1d4ed8;
+}
+
+
+/* ==================================================
+   ACCOUNT
+================================================== */
+
+.account-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.account-item {
+    padding: 15px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #f8fafc;
+}
+
+.account-item span {
+    display: block;
+    margin-bottom: 6px;
+    color: #64748b;
+    font-size: 11px;
+}
+
+.account-item strong {
+    color: #0f172a;
+    font-size: 14px;
+    word-break: break-word;
+}
+
+
+/* ==================================================
+   ACCOUNT ACTIONS
+================================================== */
+
+.account-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.profile-btn,
+.password-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 10px 15px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.profile-btn {
+    background: #2563eb;
+    color: white;
+}
+
+.profile-btn:hover {
+    background: #1d4ed8;
+}
+
+.password-btn {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.password-btn:hover {
+    background: #e2e8f0;
+}
+
+
+/* ==================================================
+   APPLICATION
+================================================== */
+
+.application-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+
+.application-item {
+    padding: 15px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #f8fafc;
+}
+
+.application-item span {
+    display: block;
+    margin-bottom: 5px;
+    color: #64748b;
+    font-size: 11px;
+}
+
+.application-item strong {
+    color: #0f172a;
+    font-size: 13px;
+}
+
+
+/* ==================================================
+   APPLICATION NOTE
+================================================== */
+
+.application-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 18px;
+    padding: 14px;
+    border-radius: 9px;
+    background: #f8fafc;
+    color: #64748b;
+}
+
+.application-note i {
+    color: #2563eb;
+    margin-top: 2px;
+}
+
+.application-note p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+
+/* ==================================================
+   RESPONSIVE
+================================================== */
+
+@media (max-width: 850px) {
+
+    .application-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+
+@media (max-width: 650px) {
+
+    .settings-card {
+        padding: 20px;
+    }
+
+    .form-grid,
+    .account-grid,
+    .application-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .full-width {
+        grid-column: auto;
+    }
+
+    .account-actions {
+        flex-direction: column;
+    }
+
+    .profile-btn,
+    .password-btn {
+        width: 100%;
+    }
+
+    .form-actions {
+        justify-content: stretch;
+    }
+
+    .save-btn {
+        width: 100%;
+    }
+
+}
+
+</style>
+
+{% endblock %}

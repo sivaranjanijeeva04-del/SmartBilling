@@ -1,0 +1,922 @@
+{% extends "base.html" %}
+
+{% block title %}Products{% endblock %}
+
+{% block page_title %}Products{% endblock %}
+
+{% block content %}
+
+<div class="products-page">
+
+    <!-- ==================================================
+         HEADER
+    ================================================== -->
+
+    <div class="page-header">
+
+        <div>
+            <h1>Products</h1>
+
+            <p>
+                Manage your product inventory and stock levels.
+            </p>
+        </div>
+
+
+        <a
+            href="{% url 'add_product' %}"
+            class="add-product-btn"
+        >
+            <i class="fa-solid fa-plus"></i>
+            Add Product
+        </a>
+
+    </div>
+
+
+    <!-- ==================================================
+         FILTER
+    ================================================== -->
+
+    <div class="filter-card">
+
+        <form
+            method="GET"
+            class="filter-form"
+        >
+
+            <!-- Search -->
+
+            <div class="search-box">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ search }}"
+                    placeholder="Search product or category..."
+                >
+
+            </div>
+
+
+            <!-- Category -->
+
+            <select
+                name="category"
+                class="filter-select"
+            >
+
+                <option value="">
+                    All Categories
+                </option>
+
+                {% for item in categories %}
+
+                    <option
+                        value="{{ item }}"
+                        {% if category == item %}selected{% endif %}
+                    >
+                        {{ item }}
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+
+            <!-- Stock Status -->
+
+            <select
+                name="stock_status"
+                class="filter-select"
+            >
+
+                <option value="">
+                    All Stock
+                </option>
+
+                <option
+                    value="in_stock"
+                    {% if stock_status == "in_stock" %}selected{% endif %}
+                >
+                    In Stock
+                </option>
+
+                <option
+                    value="low_stock"
+                    {% if stock_status == "low_stock" %}selected{% endif %}
+                >
+                    Low Stock
+                </option>
+
+                <option
+                    value="out_of_stock"
+                    {% if stock_status == "out_of_stock" %}selected{% endif %}
+                >
+                    Out of Stock
+                </option>
+
+            </select>
+
+
+            <!-- Filter -->
+
+            <button
+                type="submit"
+                class="filter-btn"
+            >
+                <i class="fa-solid fa-filter"></i>
+                Filter
+            </button>
+
+
+            <!-- Clear -->
+
+            <a
+                href="{% url 'products' %}"
+                class="clear-btn"
+            >
+                Clear
+            </a>
+
+        </form>
+
+    </div>
+
+
+    <!-- ==================================================
+         PRODUCT TABLE
+    ================================================== -->
+
+    <div class="table-card">
+
+        <div class="table-header">
+
+            <div>
+
+                <h2>
+                    Product Inventory
+                </h2>
+
+                <p>
+
+                    {% if products %}
+
+                        {{ products|length }} product(s) found
+
+                    {% else %}
+
+                        No products found
+
+                    {% endif %}
+
+                </p>
+
+            </div>
+
+        </div>
+
+
+        {% if products %}
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Product
+                        </th>
+
+                        <th>
+                            Category
+                        </th>
+
+                        <th>
+                            Price
+                        </th>
+
+                        <th>
+                            Stock
+                        </th>
+
+                        <th>
+                            Stock Status
+                        </th>
+
+                        <th>
+                            Created
+                        </th>
+
+                        <th>
+                            Actions
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for product in products %}
+
+                    <tr>
+
+                        <!-- Product -->
+
+                        <td>
+
+                            <div class="product-info">
+
+                                <div class="product-icon">
+
+                                    <i class="fa-solid fa-box"></i>
+
+                                </div>
+
+
+                                <div>
+
+                                    <strong>
+                                        {{ product.name }}
+                                    </strong>
+
+
+                                    {% if product.description %}
+
+                                    <span>
+                                        {{ product.description|truncatechars:40 }}
+                                    </span>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- Category -->
+
+                        <td>
+
+                            <span class="category-badge">
+                                {{ product.category }}
+                            </span>
+
+                        </td>
+
+
+                        <!-- Price -->
+
+                        <td>
+
+                            <strong class="price">
+                                ₹{{ product.price|floatformat:2 }}
+                            </strong>
+
+                        </td>
+
+
+                        <!-- Stock -->
+
+                        <td>
+
+                            <strong class="stock-number">
+                                {{ product.stock }}
+                            </strong>
+
+                        </td>
+
+
+                        <!-- Stock Status -->
+
+                        <td>
+
+                            {% if product.stock == 0 %}
+
+                                <span class="stock-badge out">
+                                    <i class="fa-solid fa-circle-xmark"></i>
+                                    Out of Stock
+                                </span>
+
+                            {% elif product.stock <= 5 %}
+
+                                <span class="stock-badge low">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                    Low Stock
+                                </span>
+
+                            {% else %}
+
+                                <span class="stock-badge available">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    In Stock
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Created -->
+
+                        <td>
+
+                            <div class="date-info">
+
+                                <strong>
+                                    {{ product.created_at|date:"d M Y" }}
+                                </strong>
+
+                                <span>
+                                    {{ product.created_at|date:"h:i A" }}
+                                </span>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- Actions -->
+
+                        <td>
+
+                            <div class="action-buttons">
+
+                                <a
+                                    href="{% url 'edit_product' product.id %}"
+                                    class="edit-btn"
+                                    title="Edit Product"
+                                >
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+
+
+                                <a
+                                    href="{% url 'delete_product' product.id %}"
+                                    class="delete-btn"
+                                    title="Delete Product"
+                                    onclick="return confirm('Are you sure you want to delete this product?');"
+                                >
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        {% else %}
+
+        <!-- ==================================================
+             EMPTY STATE
+        ================================================== -->
+
+        <div class="empty-state">
+
+            <div class="empty-icon">
+
+                <i class="fa-solid fa-box-open"></i>
+
+            </div>
+
+
+            <h3>
+                No products found
+            </h3>
+
+
+            <p>
+
+                {% if search or category or stock_status %}
+
+                    Try changing your search or filter.
+
+                {% else %}
+
+                    Add your first product to start managing inventory.
+
+                {% endif %}
+
+            </p>
+
+
+            {% if not search and not category and not stock_status %}
+
+            <a
+                href="{% url 'add_product' %}"
+                class="empty-btn"
+            >
+                <i class="fa-solid fa-plus"></i>
+                Add Product
+            </a>
+
+            {% endif %}
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<style>
+
+/* ==================================================
+   PAGE
+================================================== */
+
+.products-page {
+    max-width: 1450px;
+    margin: 0 auto 30px;
+}
+
+
+/* ==================================================
+   HEADER
+================================================== */
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 22px;
+}
+
+.page-header h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 28px;
+}
+
+.page-header p {
+    margin: 6px 0 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.add-product-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 17px;
+    border-radius: 8px;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.add-product-btn:hover {
+    background: #1d4ed8;
+}
+
+
+/* ==================================================
+   FILTER
+================================================== */
+
+.filter-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 13px;
+    padding: 18px;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 18px rgba(15, 23, 42, .03);
+}
+
+.filter-form {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.search-box {
+    position: relative;
+    flex: 1;
+    min-width: 250px;
+}
+
+.search-box i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+.search-box input,
+.filter-select {
+    height: 44px;
+    box-sizing: border-box;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: white;
+    color: #334155;
+    font-size: 13px;
+    outline: none;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0 14px 0 40px;
+}
+
+.filter-select {
+    min-width: 175px;
+    padding: 0 12px;
+}
+
+.search-box input:focus,
+.filter-select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .10);
+}
+
+.filter-btn,
+.clear-btn {
+    height: 44px;
+    padding: 0 17px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.filter-btn {
+    border: none;
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+}
+
+.filter-btn:hover {
+    background: #1d4ed8;
+}
+
+.clear-btn {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.clear-btn:hover {
+    background: #e2e8f0;
+}
+
+
+/* ==================================================
+   TABLE CARD
+================================================== */
+
+.table-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, .04);
+}
+
+.table-header {
+    padding: 20px 22px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.table-header h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 18px;
+}
+
+.table-header p {
+    margin: 5px 0 0;
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+
+/* ==================================================
+   TABLE
+================================================== */
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    min-width: 1100px;
+    border-collapse: collapse;
+}
+
+thead {
+    background: #f8fafc;
+}
+
+th {
+    padding: 13px 15px;
+    text-align: left;
+    color: #64748b;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    white-space: nowrap;
+}
+
+td {
+    padding: 15px;
+    border-top: 1px solid #f1f5f9;
+    color: #334155;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+tr:hover td {
+    background: #f8fafc;
+}
+
+
+/* ==================================================
+   PRODUCT
+================================================== */
+
+.product-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.product-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.product-info strong {
+    display: block;
+    color: #0f172a;
+    font-size: 12px;
+}
+
+.product-info span {
+    display: block;
+    margin-top: 3px;
+    color: #94a3b8;
+    font-size: 10px;
+}
+
+
+/* ==================================================
+   CATEGORY
+================================================== */
+
+.category-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 20px;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+
+/* ==================================================
+   PRICE
+================================================== */
+
+.price {
+    color: #0f172a;
+    font-size: 13px;
+}
+
+
+/* ==================================================
+   STOCK
+================================================== */
+
+.stock-number {
+    color: #0f172a;
+    font-size: 13px;
+}
+
+
+/* ==================================================
+   STOCK STATUS
+================================================== */
+
+.stock-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.stock-badge.available {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.stock-badge.low {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.stock-badge.out {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+
+/* ==================================================
+   DATE
+================================================== */
+
+.date-info strong {
+    display: block;
+    color: #334155;
+    font-size: 11px;
+}
+
+.date-info span {
+    display: block;
+    margin-top: 3px;
+    color: #94a3b8;
+    font-size: 10px;
+}
+
+
+/* ==================================================
+   ACTIONS
+================================================== */
+
+.action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.edit-btn,
+.delete-btn {
+    width: 33px;
+    height: 33px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 11px;
+}
+
+.edit-btn {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.edit-btn:hover {
+    background: #dbeafe;
+}
+
+.delete-btn {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.delete-btn:hover {
+    background: #fee2e2;
+}
+
+
+/* ==================================================
+   EMPTY STATE
+================================================== */
+
+.empty-state {
+    text-align: center;
+    padding: 70px 20px;
+}
+
+.empty-icon {
+    width: 65px;
+    height: 65px;
+    margin: 0 auto 15px;
+    border-radius: 15px;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 25px;
+}
+
+.empty-state h3 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 18px;
+}
+
+.empty-state p {
+    margin: 8px 0 20px;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.empty-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 11px 17px;
+    border-radius: 8px;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.empty-btn:hover {
+    background: #1d4ed8;
+}
+
+
+/* ==================================================
+   RESPONSIVE
+================================================== */
+
+@media (max-width: 850px) {
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .add-product-btn {
+        width: 100%;
+    }
+
+    .search-box {
+        flex-basis: 100%;
+    }
+
+    .filter-select,
+    .filter-btn,
+    .clear-btn {
+        width: 100%;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .table-header {
+        padding: 17px;
+    }
+
+    .table-wrapper {
+        margin: 0;
+    }
+
+}
+</style>
+
+{% endblock %}

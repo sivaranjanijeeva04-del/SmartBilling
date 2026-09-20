@@ -1,0 +1,1765 @@
+{% extends "base.html" %}
+
+{% block title %}Reports{% endblock %}
+
+{% block page_title %}Reports{% endblock %}
+
+{% block content %}
+
+<div class="reports-page">
+
+    <!-- Header -->
+    <div class="page-header">
+
+        <div>
+            <h1>Reports</h1>
+
+            <p>
+                Overview of sales, payments and invoice activity.
+            </p>
+        </div>
+
+    </div>
+
+
+    <!-- Date Filter -->
+    <div class="filter-card">
+
+        <form method="GET" class="filter-form">
+
+            <div class="filter-group">
+
+                <label for="date_filter">
+                    Report Period
+                </label>
+
+                <select
+                    name="date_filter"
+                    id="date_filter"
+                    class="filter-select"
+                >
+
+                    <option
+                        value="all"
+                        {% if date_filter == "all" %}selected{% endif %}
+                    >
+                        All Time
+                    </option>
+
+                    <option
+                        value="today"
+                        {% if date_filter == "today" %}selected{% endif %}
+                    >
+                        Today
+                    </option>
+
+                    <option
+                        value="week"
+                        {% if date_filter == "week" %}selected{% endif %}
+                    >
+                        This Week
+                    </option>
+
+                    <option
+                        value="month"
+                        {% if date_filter == "month" %}selected{% endif %}
+                    >
+                        This Month
+                    </option>
+
+                    <option
+                        value="year"
+                        {% if date_filter == "year" %}selected{% endif %}
+                    >
+                        This Year
+                    </option>
+
+                    <option
+                        value="custom"
+                        {% if date_filter == "custom" %}selected{% endif %}
+                    >
+                        Custom Date
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- Custom Date -->
+            <div
+                class="custom-date-group"
+                id="customDateGroup"
+            >
+
+                <div class="date-field">
+
+                    <label for="start_date">
+                        From
+                    </label>
+
+                    <input
+                        type="date"
+                        name="start_date"
+                        id="start_date"
+                        value="{{ start_date }}"
+                        class="filter-input"
+                    >
+
+                </div>
+
+
+                <div class="date-field">
+
+                    <label for="end_date">
+                        To
+                    </label>
+
+                    <input
+                        type="date"
+                        name="end_date"
+                        id="end_date"
+                        value="{{ end_date }}"
+                        class="filter-input"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="filter-btn"
+            >
+                <i class="fa-solid fa-filter"></i>
+                Apply Filter
+            </button>
+
+
+            <a
+                href="{% url 'export_reports_csv' %}?date_filter={{ date_filter }}&start_date={{ start_date }}&end_date={{ end_date }}"
+                class="export-btn"
+            >
+                <i class="fa-solid fa-file-csv"></i>
+                Export CSV
+            </a>
+
+
+            <a
+                href="{% url 'reports' %}"
+                class="clear-btn"
+            >
+                Clear
+            </a>
+
+        </form>
+
+    </div>
+
+
+    <!-- Main Statistics -->
+    <div class="stats-grid">
+
+        <!-- Total Sales -->
+        <div class="stat-card">
+
+            <div>
+
+                <span>Total Sales</span>
+
+                <h2>
+                    ₹{{ total_sales|floatformat:2 }}
+                </h2>
+
+                <p>
+                    Overall invoice value
+                </p>
+
+            </div>
+
+            <div class="stat-icon blue">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+
+        </div>
+
+
+        <!-- Total Paid -->
+        <div class="stat-card">
+
+            <div>
+
+                <span>Total Paid</span>
+
+                <h2>
+                    ₹{{ total_paid|floatformat:2 }}
+                </h2>
+
+                <p>
+                    Payments received
+                </p>
+
+            </div>
+
+            <div class="stat-icon green">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+
+        </div>
+
+
+        <!-- Pending Amount -->
+        <div class="stat-card">
+
+            <div>
+
+                <span>Pending Amount</span>
+
+                <h2>
+                    ₹{{ pending_amount|floatformat:2 }}
+                </h2>
+
+                <p>
+                    Outstanding amount
+                </p>
+
+            </div>
+
+            <div class="stat-icon orange">
+                <i class="fa-solid fa-clock"></i>
+            </div>
+
+        </div>
+
+
+        <!-- Total Payments -->
+        <div class="stat-card">
+
+            <div>
+
+                <span>Total Payments</span>
+
+                <h2>
+                    {{ total_payments }}
+                </h2>
+
+                <p>
+                    Payment transactions
+                </p>
+
+            </div>
+
+            <div class="stat-icon purple">
+                <i class="fa-solid fa-money-bill-wave"></i>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Invoice Status -->
+    <div class="section-title">
+
+        <h2>Invoice Status</h2>
+
+        <p>
+            Current invoice payment status.
+        </p>
+
+    </div>
+
+
+    <div class="status-grid">
+
+        <!-- Paid -->
+        <div class="status-card paid-card">
+
+            <div class="status-icon">
+
+                <i class="fa-solid fa-circle-check"></i>
+
+            </div>
+
+            <div>
+
+                <span>Paid Invoices</span>
+
+                <h3>
+                    {{ paid_invoices }}
+                </h3>
+
+            </div>
+
+        </div>
+
+
+        <!-- Partial -->
+        <div class="status-card partial-card">
+
+            <div class="status-icon">
+
+                <i class="fa-solid fa-clock"></i>
+
+            </div>
+
+            <div>
+
+                <span>Partial Invoices</span>
+
+                <h3>
+                    {{ partial_invoices }}
+                </h3>
+
+            </div>
+
+        </div>
+
+
+        <!-- Pending -->
+        <div class="status-card pending-card">
+
+            <div class="status-icon">
+
+                <i class="fa-solid fa-circle-exclamation"></i>
+
+            </div>
+
+            <div>
+
+                <span>Pending Invoices</span>
+
+                <h3>
+                    {{ pending_invoices }}
+                </h3>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Payment Method Breakdown -->
+    <div class="section-title">
+
+        <h2>
+            Payment Method Breakdown
+        </h2>
+
+        <p>
+            Total amount received through each payment method.
+        </p>
+
+    </div>
+
+
+    <div class="payment-method-grid">
+
+        <!-- Cash -->
+        <div class="method-card">
+
+            <div class="method-icon cash">
+                <i class="fa-solid fa-money-bill"></i>
+            </div>
+
+            <div>
+
+                <span>Cash</span>
+
+                <h3>
+                    ₹{{ cash_total|floatformat:2 }}
+                </h3>
+
+            </div>
+
+        </div>
+
+
+        <!-- Card -->
+        <div class="method-card">
+
+            <div class="method-icon card">
+                <i class="fa-solid fa-credit-card"></i>
+            </div>
+
+            <div>
+
+                <span>Card</span>
+
+                <h3>
+                    ₹{{ card_total|floatformat:2 }}
+                </h3>
+
+            </div>
+
+        </div>
+
+
+        <!-- UPI -->
+        <div class="method-card">
+
+            <div class="method-icon upi">
+                <i class="fa-solid fa-mobile-screen-button"></i>
+            </div>
+
+            <div>
+
+                <span>UPI</span>
+
+                <h3>
+                    ₹{{ upi_total|floatformat:2 }}
+                </h3>
+
+            </div>
+
+        </div>
+
+
+        <!-- Bank Transfer -->
+        <div class="method-card">
+
+            <div class="method-icon bank">
+                <i class="fa-solid fa-building-columns"></i>
+            </div>
+
+            <div>
+
+                <span>Bank Transfer</span>
+
+                <h3>
+                    ₹{{ bank_total|floatformat:2 }}
+                </h3>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Charts -->
+    <div class="charts-grid">
+
+        <!-- Payment Overview -->
+        <div class="chart-card">
+
+            <div class="chart-header">
+
+                <div>
+
+                    <h2>
+                        Payment Overview
+                    </h2>
+
+                    <p>
+                        Payments received by method.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="chart-container">
+
+                <canvas id="paymentChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+        <!-- Invoice Status -->
+        <div class="chart-card">
+
+            <div class="chart-header">
+
+                <div>
+
+                    <h2>
+                        Invoice Status
+                    </h2>
+
+                    <p>
+                        Current invoice status distribution.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="chart-container">
+
+                <canvas id="invoiceChart"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Recent Activity -->
+    <div class="activity-grid">
+
+        <!-- Recent Invoices -->
+        <div class="report-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h2>
+                        Recent Invoices
+                    </h2>
+
+                    <p>
+                        Latest invoices generated.
+                    </p>
+
+                </div>
+
+                <a href="{% url 'invoices' %}">
+                    View All
+                </a>
+
+            </div>
+
+
+            {% if recent_invoices %}
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Invoice
+                            </th>
+
+                            <th>
+                                Customer
+                            </th>
+
+                            <th>
+                                Amount
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for invoice in recent_invoices %}
+
+                        <tr>
+
+                            <td>
+
+                                <a
+                                    href="{% url 'invoice_detail' invoice.id %}"
+                                    class="invoice-link"
+                                >
+                                    {{ invoice.invoice_number }}
+                                </a>
+
+                            </td>
+
+
+                            <td>
+                                {{ invoice.customer.name }}
+                            </td>
+
+
+                            <td>
+                                ₹{{ invoice.grand_total|floatformat:2 }}
+                            </td>
+
+
+                            <td>
+
+                                {% if invoice.payment_status == "Paid" %}
+
+                                    <span class="badge paid">
+                                        Paid
+                                    </span>
+
+                                {% elif invoice.payment_status == "Partial" %}
+
+                                    <span class="badge partial">
+                                        Partial
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge pending">
+                                        Pending
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% else %}
+
+                <div class="empty">
+
+                    <i class="fa-solid fa-file-invoice"></i>
+
+                    <p>
+                        No invoices available.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- Recent Payments -->
+        <div class="report-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h2>
+                        Recent Payments
+                    </h2>
+
+                    <p>
+                        Latest payment transactions.
+                    </p>
+
+                </div>
+
+                <a href="{% url 'payments' %}">
+                    View All
+                </a>
+
+            </div>
+
+
+            {% if recent_payments %}
+
+            <div class="payment-list">
+
+                {% for payment in recent_payments %}
+
+                <div class="payment-item">
+
+                    <div class="payment-icon">
+
+                        <i class="fa-solid fa-money-bill-wave"></i>
+
+                    </div>
+
+
+                    <div class="payment-info">
+
+                        <strong>
+                            {{ payment.invoice.invoice_number }}
+                        </strong>
+
+                        <span>
+                            {{ payment.invoice.customer.name }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="payment-value">
+
+                        <strong>
+                            ₹{{ payment.amount|floatformat:2 }}
+                        </strong>
+
+                        <span>
+                            {{ payment.payment_method }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% else %}
+
+                <div class="empty">
+
+                    <i class="fa-solid fa-money-bill-wave"></i>
+
+                    <p>
+                        No payments available.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- System Overview -->
+    <div class="section-title">
+
+        <h2>
+            System Overview
+        </h2>
+
+        <p>
+            Current records in SmartBilling.
+        </p>
+
+    </div>
+
+
+    <div class="overview-grid">
+
+        <!-- Products -->
+        <div class="overview-card">
+
+            <i class="fa-solid fa-box"></i>
+
+            <div>
+
+                <span>
+                    Products
+                </span>
+
+                <strong>
+                    {{ total_products }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- Customers -->
+        <div class="overview-card">
+
+            <i class="fa-solid fa-users"></i>
+
+            <div>
+
+                <span>
+                    Customers
+                </span>
+
+                <strong>
+                    {{ total_customers }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- Invoices -->
+        <div class="overview-card">
+
+            <i class="fa-solid fa-file-invoice"></i>
+
+            <div>
+
+                <span>
+                    Invoices
+                </span>
+
+                <strong>
+                    {{ total_invoices }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- Payments -->
+        <div class="overview-card">
+
+            <i class="fa-solid fa-credit-card"></i>
+
+            <div>
+
+                <span>
+                    Payments
+                </span>
+
+                <strong>
+                    {{ total_payments }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+
+/* ==================================================
+   PAGE
+================================================== */
+
+.reports-page {
+    max-width: 1400px;
+    margin: auto;
+}
+
+
+/* ==================================================
+   HEADER
+================================================== */
+
+.page-header {
+    margin-bottom: 20px;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 28px;
+    color: #0f172a;
+}
+
+.page-header p {
+    margin: 6px 0 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+
+/* ==================================================
+   FILTER
+================================================== */
+
+.filter-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 13px;
+    padding: 18px;
+    margin-bottom: 22px;
+    box-shadow: 0 5px 18px rgba(15, 23, 42, .03);
+}
+
+.filter-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    min-width: 190px;
+}
+
+.filter-group label,
+.date-field label {
+    display: block;
+    margin-bottom: 7px;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.filter-select,
+.filter-input {
+    height: 44px;
+    box-sizing: border-box;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: white;
+    padding: 0 12px;
+    color: #334155;
+    font-size: 13px;
+    outline: none;
+}
+
+.filter-select {
+    min-width: 190px;
+}
+
+.filter-input {
+    min-width: 150px;
+}
+
+.filter-select:focus,
+.filter-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .10);
+}
+
+.custom-date-group {
+    display: none;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.date-field {
+    min-width: 150px;
+}
+
+
+/* Filter Buttons */
+
+.filter-btn,
+.export-btn,
+.clear-btn {
+    height: 44px;
+    padding: 0 17px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.filter-btn {
+    border: none;
+    background: #2563eb;
+    color: white;
+}
+
+.filter-btn:hover {
+    background: #1d4ed8;
+}
+
+
+.export-btn {
+    background: #0f766e;
+    color: white;
+}
+
+.export-btn:hover {
+    background: #115e59;
+}
+
+
+.clear-btn {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.clear-btn:hover {
+    background: #e2e8f0;
+}
+
+
+/* ==================================================
+   MAIN STATS
+================================================== */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+}
+
+.stat-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 15px;
+    padding: 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, .04);
+    transition: .2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+}
+
+.stat-card span {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.stat-card h2 {
+    margin: 8px 0 5px;
+    color: #0f172a;
+    font-size: 25px;
+}
+
+.stat-card p {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+.stat-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.stat-icon.blue {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.stat-icon.green {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+.stat-icon.orange {
+    background: #fff7ed;
+    color: #ea580c;
+}
+
+.stat-icon.purple {
+    background: #f5f3ff;
+    color: #7c3aed;
+}
+
+
+/* ==================================================
+   SECTION
+================================================== */
+
+.section-title {
+    margin: 28px 0 15px;
+}
+
+.section-title h2 {
+    margin: 0;
+    font-size: 20px;
+    color: #0f172a;
+}
+
+.section-title p {
+    margin: 5px 0 0;
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+
+/* ==================================================
+   INVOICE STATUS
+================================================== */
+
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.status-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 13px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.status-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.paid-card .status-icon {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.partial-card .status-icon {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.pending-card .status-icon {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.status-card span {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.status-card h3 {
+    margin: 5px 0 0;
+    color: #0f172a;
+    font-size: 23px;
+}
+
+
+/* ==================================================
+   PAYMENT METHODS
+================================================== */
+
+.payment-method-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+}
+
+.method-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 13px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.method-icon {
+    width: 43px;
+    height: 43px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.method-icon.cash {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.method-icon.card {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.method-icon.upi {
+    background: #f5f3ff;
+    color: #7c3aed;
+}
+
+.method-icon.bank {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.method-card span {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.method-card h3 {
+    margin: 4px 0 0;
+    color: #0f172a;
+    font-size: 19px;
+}
+
+
+/* ==================================================
+   CHARTS
+================================================== */
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 28px;
+}
+
+.chart-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, .04);
+}
+
+.chart-header {
+    margin-bottom: 15px;
+}
+
+.chart-header h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 17px;
+}
+
+.chart-header p {
+    margin: 5px 0 0;
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+
+/* ==================================================
+   ACTIVITY
+================================================== */
+
+.activity-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 18px;
+    margin-top: 28px;
+}
+
+.report-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 20px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 17px;
+}
+
+.card-header p {
+    margin: 5px 0 0;
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+.card-header a {
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+
+/* ==================================================
+   TABLE
+================================================== */
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    padding: 12px 16px;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 10px;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+td {
+    padding: 14px 16px;
+    border-top: 1px solid #f1f5f9;
+    color: #334155;
+    font-size: 12px;
+}
+
+tr:hover td {
+    background: #f8fafc;
+}
+
+.invoice-link {
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.invoice-link:hover {
+    text-decoration: underline;
+}
+
+
+/* ==================================================
+   BADGES
+================================================== */
+
+.badge {
+    padding: 5px 9px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.badge.paid {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.badge.partial {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.badge.pending {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+
+/* ==================================================
+   PAYMENTS
+================================================== */
+
+.payment-list {
+    padding: 5px 20px;
+}
+
+.payment-item {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 14px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.payment-item:last-child {
+    border-bottom: none;
+}
+
+.payment-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.payment-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.payment-info strong {
+    color: #0f172a;
+    font-size: 12px;
+}
+
+.payment-info span {
+    color: #94a3b8;
+    font-size: 10px;
+}
+
+.payment-value {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.payment-value strong {
+    color: #15803d;
+    font-size: 12px;
+}
+
+.payment-value span {
+    color: #94a3b8;
+    font-size: 10px;
+}
+
+
+/* ==================================================
+   EMPTY
+================================================== */
+
+.empty {
+    text-align: center;
+    padding: 40px;
+    color: #94a3b8;
+}
+
+.empty i {
+    display: block;
+    font-size: 25px;
+    margin-bottom: 10px;
+}
+
+.empty p {
+    margin: 0;
+}
+
+
+/* ==================================================
+   OVERVIEW
+================================================== */
+
+.overview-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 25px;
+}
+
+.overview-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 13px;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.overview-card > i {
+    width: 40px;
+    height: 40px;
+    border-radius: 9px;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.overview-card span {
+    display: block;
+    color: #64748b;
+    font-size: 11px;
+}
+
+.overview-card strong {
+    display: block;
+    margin-top: 3px;
+    color: #0f172a;
+    font-size: 19px;
+}
+
+
+/* ==================================================
+   RESPONSIVE
+================================================== */
+
+@media (max-width: 1100px) {
+
+    .stats-grid,
+    .payment-method-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .activity-grid,
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .overview-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+
+@media (max-width: 850px) {
+
+    .filter-form {
+        align-items: stretch;
+    }
+
+    .filter-group {
+        width: 100%;
+    }
+
+    .filter-select {
+        width: 100%;
+    }
+
+    .custom-date-group {
+        width: 100%;
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .stats-grid,
+    .status-grid,
+    .payment-method-grid,
+    .overview-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .custom-date-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .date-field {
+        width: 100%;
+    }
+
+    .filter-input {
+        width: 100%;
+    }
+
+    .filter-btn,
+    .export-btn,
+    .clear-btn {
+        width: 100%;
+    }
+
+}
+
+
+/* ==================================================
+   SMALL MOBILE
+================================================== */
+
+@media (max-width: 480px) {
+
+    .stat-card,
+    .status-card,
+    .method-card,
+    .chart-card {
+        padding: 16px;
+    }
+
+    .chart-container {
+        height: 260px;
+    }
+
+}
+
+</style>
+
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script>
+
+    /* ==================================================
+       DATE FILTER
+    ================================================== */
+
+    const dateFilter =
+        document.getElementById("date_filter");
+
+    const customDateGroup =
+        document.getElementById("customDateGroup");
+
+
+    function toggleCustomDates() {
+
+        if (dateFilter.value === "custom") {
+
+            customDateGroup.style.display = "flex";
+
+        } else {
+
+            customDateGroup.style.display = "none";
+
+        }
+
+    }
+
+
+    dateFilter.addEventListener(
+        "change",
+        toggleCustomDates
+    );
+
+
+    toggleCustomDates();
+
+
+    /* ==================================================
+       PAYMENT METHOD CHART
+    ================================================== */
+
+    const paymentCanvas =
+        document.getElementById("paymentChart");
+
+
+    if (paymentCanvas) {
+
+        new Chart(
+            paymentCanvas,
+            {
+                type: "doughnut",
+
+                data: {
+
+                    labels: [
+                        "Cash",
+                        "Card",
+                        "UPI",
+                        "Bank Transfer"
+                    ],
+
+                    datasets: [
+                        {
+                            data: [
+                                Number(
+                                    "{{ cash_total|default:'0' }}"
+                                ),
+
+                                Number(
+                                    "{{ card_total|default:'0' }}"
+                                ),
+
+                                Number(
+                                    "{{ upi_total|default:'0' }}"
+                                ),
+
+                                Number(
+                                    "{{ bank_total|default:'0' }}"
+                                )
+                            ],
+
+                            borderWidth: 2
+                        }
+                    ]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    plugins: {
+
+                        legend: {
+                            position: "bottom"
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* ==================================================
+       INVOICE STATUS CHART
+    ================================================== */
+
+    const invoiceCanvas =
+        document.getElementById("invoiceChart");
+
+
+    if (invoiceCanvas) {
+
+        new Chart(
+            invoiceCanvas,
+            {
+                type: "doughnut",
+
+                data: {
+
+                    labels: [
+                        "Paid",
+                        "Partial",
+                        "Pending"
+                    ],
+
+                    datasets: [
+                        {
+                            data: [
+                                Number(
+                                    "{{ paid_invoices|default:'0' }}"
+                                ),
+
+                                Number(
+                                    "{{ partial_invoices|default:'0' }}"
+                                ),
+
+                                Number(
+                                    "{{ pending_invoices|default:'0' }}"
+                                )
+                            ],
+
+                            borderWidth: 2
+                        }
+                    ]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    plugins: {
+
+                        legend: {
+                            position: "bottom"
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+</script>
+
+{% endblock %}

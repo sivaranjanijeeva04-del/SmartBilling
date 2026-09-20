@@ -1,0 +1,611 @@
+{% extends "base.html" %}
+
+{% block title %}Invoices{% endblock %}
+
+{% block page_title %}Invoices{% endblock %}
+
+{% block content %}
+
+<div class="invoice-page">
+
+    <!-- Header -->
+    <div class="page-header">
+        <div>
+            <h1>Invoices</h1>
+            <p>Manage customer invoices and payment status.</p>
+        </div>
+
+        <a href="{% url 'add_invoice' %}" class="add-btn">
+            <i class="fa-solid fa-plus"></i>
+            Create Invoice
+        </a>
+    </div>
+
+
+    <!-- Search & Filter -->
+    <div class="filter-card">
+
+        <form method="GET" class="filter-form">
+
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ search }}"
+                    placeholder="Search invoice or customer..."
+                >
+            </div>
+
+
+            <select name="status">
+
+                <option value="">All Status</option>
+
+                <option value="Paid"
+                    {% if status == "Paid" %}selected{% endif %}>
+                    Paid
+                </option>
+
+                <option value="Partial"
+                    {% if status == "Partial" %}selected{% endif %}>
+                    Partial
+                </option>
+
+                <option value="Pending"
+                    {% if status == "Pending" %}selected{% endif %}>
+                    Pending
+                </option>
+
+            </select>
+
+
+            <button type="submit" class="filter-btn">
+                <i class="fa-solid fa-filter"></i>
+                Filter
+            </button>
+
+
+            <a href="{% url 'invoices' %}" class="clear-btn">
+                Clear
+            </a>
+
+        </form>
+
+    </div>
+
+
+    <!-- Invoice Table -->
+    <div class="table-card">
+
+        <div class="table-header">
+
+            <div>
+                <h2>Invoice List</h2>
+
+                <p>
+                    {% if invoices %}
+                        {{ invoices|length }} invoice(s) found
+                    {% else %}
+                        No invoices found
+                    {% endif %}
+                </p>
+            </div>
+
+        </div>
+
+
+        {% if invoices %}
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Invoice</th>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th>Subtotal</th>
+                        <th>Discount</th>
+                        <th>Tax</th>
+                        <th>Grand Total</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+
+                <tbody>
+
+                    {% for invoice in invoices %}
+
+                    <tr>
+
+                        <td>
+                            <a
+                                href="{% url 'invoice_detail' invoice.id %}"
+                                class="invoice-number"
+                            >
+                                {{ invoice.invoice_number }}
+                            </a>
+                        </td>
+
+
+                        <td>
+                            <div class="customer-name">
+                                <div class="customer-icon">
+                                    <i class="fa-solid fa-user"></i>
+                                </div>
+
+                                <span>
+                                    {{ invoice.customer.name }}
+                                </span>
+                            </div>
+                        </td>
+
+
+                        <td>
+                            {{ invoice.invoice_date|date:"d M Y" }}
+                        </td>
+
+
+                        <td>
+                            ₹{{ invoice.subtotal|floatformat:2 }}
+                        </td>
+
+
+                        <td>
+                            ₹{{ invoice.discount|floatformat:2 }}
+                        </td>
+
+
+                        <td>
+                            ₹{{ invoice.tax|floatformat:2 }}
+                        </td>
+
+
+                        <td>
+                            <strong>
+                                ₹{{ invoice.grand_total|floatformat:2 }}
+                            </strong>
+                        </td>
+
+
+                        <td>
+
+                            {% if invoice.payment_status == "Paid" %}
+
+                            <span class="status paid">
+                                <i class="fa-solid fa-circle-check"></i>
+                                Paid
+                            </span>
+
+                            {% elif invoice.payment_status == "Partial" %}
+
+                            <span class="status partial">
+                                <i class="fa-solid fa-clock"></i>
+                                Partial
+                            </span>
+
+                            {% else %}
+
+                            <span class="status pending">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                Pending
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+
+                            <a
+                                href="{% url 'invoice_detail' invoice.id %}"
+                                class="view-btn"
+                            >
+                                <i class="fa-solid fa-eye"></i>
+                                View
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <!-- Empty State -->
+
+        <div class="empty-state">
+
+            <div class="empty-icon">
+                <i class="fa-solid fa-file-invoice"></i>
+            </div>
+
+            <h3>No invoices found</h3>
+
+            <p>
+                {% if search or status %}
+                    Try changing your search or filter.
+                {% else %}
+                    Create your first invoice to get started.
+                {% endif %}
+            </p>
+
+            {% if not search and not status %}
+            <a href="{% url 'add_invoice' %}" class="empty-btn">
+                <i class="fa-solid fa-plus"></i>
+                Create Invoice
+            </a>
+            {% endif %}
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<style>
+
+.invoice-page {
+    max-width: 1400px;
+    margin: auto;
+}
+
+
+/* Header */
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+.page-header h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 28px;
+}
+
+.page-header p {
+    margin: 6px 0 0;
+    color: #64748b;
+}
+
+.add-btn {
+    background: #2563eb;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 9px;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.add-btn:hover {
+    background: #1d4ed8;
+}
+
+
+/* Filter */
+
+.filter-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 13px;
+    padding: 18px;
+    margin-bottom: 20px;
+}
+
+.filter-form {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.search-box {
+    position: relative;
+    flex: 1;
+}
+
+.search-box i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+.search-box input,
+.filter-form select {
+    height: 44px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    outline: none;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0 14px 0 40px;
+}
+
+.filter-form select {
+    min-width: 150px;
+    padding: 0 12px;
+    background: white;
+}
+
+.search-box input:focus,
+.filter-form select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .1);
+}
+
+.filter-btn,
+.clear-btn {
+    height: 44px;
+    padding: 0 17px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.filter-btn {
+    border: none;
+    background: #2563eb;
+    color: white;
+}
+
+.filter-btn:hover {
+    background: #1d4ed8;
+}
+
+.clear-btn {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+
+/* Table Card */
+
+.table-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, .04);
+}
+
+.table-header {
+    padding: 20px 22px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.table-header h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 18px;
+}
+
+.table-header p {
+    margin: 5px 0 0;
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+
+/* Table */
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1000px;
+}
+
+thead {
+    background: #f8fafc;
+}
+
+th {
+    padding: 14px 16px;
+    text-align: left;
+    color: #64748b;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    white-space: nowrap;
+}
+
+td {
+    padding: 15px 16px;
+    border-top: 1px solid #f1f5f9;
+    color: #334155;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+tr:hover td {
+    background: #f8fafc;
+}
+
+
+/* Invoice */
+
+.invoice-number {
+    color: #2563eb;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.invoice-number:hover {
+    text-decoration: underline;
+}
+
+
+/* Customer */
+
+.customer-name {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.customer-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+
+/* Status */
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.status.paid {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.status.partial {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.status.pending {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+
+/* View */
+
+.view-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 11px;
+    border-radius: 7px;
+    background: #eff6ff;
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.view-btn:hover {
+    background: #dbeafe;
+}
+
+
+/* Empty */
+
+.empty-state {
+    text-align: center;
+    padding: 70px 20px;
+}
+
+.empty-icon {
+    width: 65px;
+    height: 65px;
+    margin: 0 auto 15px;
+    border-radius: 15px;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 25px;
+}
+
+.empty-state h3 {
+    margin: 0;
+    color: #0f172a;
+}
+
+.empty-state p {
+    color: #64748b;
+    margin: 8px 0 20px;
+}
+
+.empty-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #2563eb;
+    color: white;
+    padding: 11px 17px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+
+/* Responsive */
+
+@media (max-width: 800px) {
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .filter-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-form select,
+    .filter-btn,
+    .clear-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+}
+
+</style>
+
+{% endblock %}

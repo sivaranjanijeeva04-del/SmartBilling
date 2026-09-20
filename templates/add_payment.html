@@ -1,0 +1,485 @@
+{% extends "base.html" %}
+
+{% block title %}Record Payment - SmartBilling{% endblock %}
+
+{% block page_title %}Record Payment{% endblock %}
+
+{% block content %}
+
+<style>
+    .payment-page {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .page-header h1 {
+        margin: 0;
+        font-size: 28px;
+        color: #0f172a;
+    }
+
+    .page-header p {
+        margin: 6px 0 0;
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    .payment-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 28px;
+        box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .required {
+        color: #dc2626;
+    }
+
+    .form-control {
+        width: 100%;
+        box-sizing: border-box;
+        height: 46px;
+        padding: 0 13px;
+        border: 1px solid #cbd5e1;
+        border-radius: 9px;
+        background: #fff;
+        color: #334155;
+        font-size: 13px;
+        outline: none;
+    }
+
+    textarea.form-control {
+        height: 100px;
+        padding: 12px 13px;
+        resize: vertical;
+    }
+
+    .form-control:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+    }
+
+    .invoice-info {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .info-box {
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 16px;
+    }
+
+    .info-box span {
+        display: block;
+        font-size: 11px;
+        color: #64748b;
+        margin-bottom: 5px;
+    }
+
+    .info-box strong {
+        font-size: 17px;
+        color: #0f172a;
+    }
+
+    .balance-box strong {
+        color: #dc2626;
+    }
+
+    .alert {
+        padding: 12px 15px;
+        border-radius: 9px;
+        margin-bottom: 20px;
+        font-size: 13px;
+    }
+
+    .alert.error {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #b91c1c;
+    }
+
+    .method-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-top: 10px;
+    }
+
+    .method-option input {
+        display: none;
+    }
+
+    .method-option label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 13px 10px;
+        border: 1px solid #d1d5db;
+        border-radius: 9px;
+        cursor: pointer;
+        color: #475569;
+        background: #fff;
+        font-size: 13px;
+        font-weight: 600;
+        transition: 0.2s;
+    }
+
+    .method-option input:checked + label {
+        border-color: #2563eb;
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .button-area {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 25px;
+        padding-top: 22px;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .btn {
+        min-height: 44px;
+        padding: 0 18px;
+        border-radius: 9px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+        box-sizing: border-box;
+    }
+
+    .btn-cancel {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .btn-save {
+        border: none;
+        background: #2563eb;
+        color: white;
+        cursor: pointer;
+    }
+
+    .btn-save:hover {
+        background: #1d4ed8;
+    }
+
+    @media (max-width: 700px) {
+
+        .payment-card {
+            padding: 20px;
+        }
+
+        .invoice-info {
+            grid-template-columns: 1fr;
+        }
+
+        .method-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .button-area {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="payment-page">
+
+    <div class="page-header">
+        <div>
+            <h1>Record Payment</h1>
+            <p>Record a payment against an outstanding invoice.</p>
+        </div>
+    </div>
+
+    <div class="payment-card">
+
+        {% if error %}
+            <div class="alert error">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                {{ error }}
+            </div>
+        {% endif %}
+
+        <div class="section-title">
+            Payment Information
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="invoice">
+                    Select Invoice <span class="required">*</span>
+                </label>
+
+                <select
+                    id="invoice"
+                    name="invoice"
+                    class="form-control"
+                    required
+                >
+                    <option value="">Choose an invoice</option>
+
+                    {% for invoice in invoice_data %}
+                        <option
+                            value="{{ invoice.id }}"
+                            data-invoice-number="{{ invoice.invoice_number }}"
+                            data-customer="{{ invoice.customer_name }}"
+                            data-total="{{ invoice.grand_total }}"
+                            data-paid="{{ invoice.paid_amount }}"
+                            data-remaining="{{ invoice.remaining_amount }}"
+                            {% if selected_invoice_id == invoice.id|stringformat:"s" %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ invoice.invoice_number }} -
+                            {{ invoice.customer_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div
+                class="invoice-info"
+                id="invoiceInfo"
+                style="display: none;"
+            >
+
+                <div class="info-box">
+                    <span>Invoice</span>
+                    <strong id="invoiceNumber">-</strong>
+                </div>
+
+                <div class="info-box">
+                    <span>Invoice Total</span>
+                    <strong id="invoiceTotal">₹0.00</strong>
+                </div>
+
+                <div class="info-box balance-box">
+                    <span>Remaining Amount</span>
+                    <strong id="invoiceRemaining">₹0.00</strong>
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <label for="amount">
+                    Payment Amount <span class="required">*</span>
+                </label>
+
+                <input
+                    type="number"
+                    id="amount"
+                    name="amount"
+                    class="form-control"
+                    placeholder="Enter payment amount"
+                    min="0.01"
+                    step="0.01"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    Payment Method <span class="required">*</span>
+                </label>
+
+                <div class="method-grid">
+
+                    <div class="method-option">
+                        <input
+                            type="radio"
+                            id="cash"
+                            name="payment_method"
+                            value="Cash"
+                            checked
+                        >
+                        <label for="cash">
+                            <i class="fa-solid fa-money-bill-wave"></i>
+                            &nbsp;Cash
+                        </label>
+                    </div>
+
+                    <div class="method-option">
+                        <input
+                            type="radio"
+                            id="card"
+                            name="payment_method"
+                            value="Card"
+                        >
+                        <label for="card">
+                            <i class="fa-solid fa-credit-card"></i>
+                            &nbsp;Card
+                        </label>
+                    </div>
+
+                    <div class="method-option">
+                        <input
+                            type="radio"
+                            id="upi"
+                            name="payment_method"
+                            value="UPI"
+                        >
+                        <label for="upi">
+                            <i class="fa-solid fa-mobile-screen-button"></i>
+                            &nbsp;UPI
+                        </label>
+                    </div>
+
+                    <div class="method-option">
+                        <input
+                            type="radio"
+                            id="bank"
+                            name="payment_method"
+                            value="Bank Transfer"
+                        >
+                        <label for="bank">
+                            <i class="fa-solid fa-building-columns"></i>
+                            &nbsp;Bank
+                        </label>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="notes">
+                    Notes
+                </label>
+
+                <textarea
+                    id="notes"
+                    name="notes"
+                    class="form-control"
+                    placeholder="Enter payment notes..."
+                ></textarea>
+            </div>
+
+            <div class="button-area">
+
+                <a
+                    href="{% url 'payments' %}"
+                    class="btn btn-cancel"
+                >
+                    Cancel
+                </a>
+
+                <button
+                    type="submit"
+                    class="btn btn-save"
+                >
+                    <i class="fa-solid fa-check"></i>
+                    Save Payment
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+    const invoiceSelect = document.getElementById("invoice");
+    const invoiceInfo = document.getElementById("invoiceInfo");
+
+    const invoiceNumber = document.getElementById("invoiceNumber");
+    const invoiceTotal = document.getElementById("invoiceTotal");
+    const invoiceRemaining = document.getElementById("invoiceRemaining");
+
+    const amountInput = document.getElementById("amount");
+
+    function updateInvoiceDetails() {
+
+        const option =
+            invoiceSelect.options[invoiceSelect.selectedIndex];
+
+        if (!option || !option.value) {
+
+            invoiceInfo.style.display = "none";
+
+            invoiceNumber.textContent = "-";
+            invoiceTotal.textContent = "₹0.00";
+            invoiceRemaining.textContent = "₹0.00";
+
+            amountInput.removeAttribute("max");
+
+            return;
+        }
+
+        const total =
+            parseFloat(option.dataset.total || "0");
+
+        const remaining =
+            parseFloat(option.dataset.remaining || "0");
+
+        invoiceInfo.style.display = "grid";
+
+        invoiceNumber.textContent =
+            option.dataset.invoiceNumber || "-";
+
+        invoiceTotal.textContent =
+            "₹" + total.toFixed(2);
+
+        invoiceRemaining.textContent =
+            "₹" + remaining.toFixed(2);
+
+        amountInput.max =
+            remaining.toFixed(2);
+    }
+
+    invoiceSelect.addEventListener(
+        "change",
+        updateInvoiceDetails
+    );
+
+    updateInvoiceDetails();
+</script>
+
+{% endblock %}

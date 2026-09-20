@@ -1,0 +1,422 @@
+{% extends "base.html" %}
+
+{% block title %}Add Payment{% endblock %}
+
+{% block page_title %}Add Payment{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Add Payment</h1>
+        <p>Record a payment for an outstanding invoice.</p>
+    </div>
+</div>
+
+{% if error %}
+<div class="alert-error">
+    <i class="fa-solid fa-circle-exclamation"></i>
+    {{ error }}
+</div>
+{% endif %}
+
+<div class="payment-card">
+
+    <div class="card-header">
+        <div class="header-icon">
+            <i class="fa-solid fa-money-bill-wave"></i>
+        </div>
+
+        <div>
+            <h2>Payment Information</h2>
+            <p>Enter the payment details below.</p>
+        </div>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="form-grid">
+
+            <!-- Invoice -->
+            <div class="form-group full-width">
+                <label for="invoice">
+                    Invoice <span>*</span>
+                </label>
+
+                <select
+                    name="invoice"
+                    id="invoice"
+                    required
+                    onchange="updateAmount()"
+                >
+                    <option value="">Select Invoice</option>
+
+                    {% for invoice in invoices %}
+                    <option
+                        value="{{ invoice.id }}"
+                        data-total="{{ invoice.grand_total }}"
+                    >
+                        {{ invoice.invoice_number }}
+                        — {{ invoice.customer.name }}
+                        — ₹{{ invoice.grand_total }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+                {% if not invoices %}
+                <small class="no-invoice">
+                    No outstanding invoices available.
+                </small>
+                {% endif %}
+            </div>
+
+            <!-- Amount -->
+            <div class="form-group">
+                <label for="amount">
+                    Payment Amount <span>*</span>
+                </label>
+
+                <div class="input-icon">
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
+
+                    <input
+                        type="number"
+                        name="amount"
+                        id="amount"
+                        step="0.01"
+                        min="0.01"
+                        placeholder="Enter amount"
+                        required
+                    >
+                </div>
+
+                <small id="invoiceAmount">
+                    Select an invoice to view the total.
+                </small>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="form-group">
+                <label for="payment_method">
+                    Payment Method <span>*</span>
+                </label>
+
+                <select
+                    name="payment_method"
+                    id="payment_method"
+                    required
+                >
+                    <option value="">Select Payment Method</option>
+                    <option value="Cash">Cash</option>
+                    <option value="Card">Card</option>
+                    <option value="UPI">UPI</option>
+                    <option value="Bank Transfer">Bank Transfer</option>
+                </select>
+            </div>
+
+            <!-- Notes -->
+            <div class="form-group full-width">
+                <label for="notes">
+                    Notes
+                </label>
+
+                <textarea
+                    name="notes"
+                    id="notes"
+                    rows="4"
+                    placeholder="Add payment notes if required..."
+                ></textarea>
+            </div>
+
+        </div>
+
+        <!-- Buttons -->
+        <div class="form-actions">
+
+            <a href="{% url 'payments' %}" class="btn-cancel">
+                <i class="fa-solid fa-arrow-left"></i>
+                Cancel
+            </a>
+
+            <button type="submit" class="btn-submit">
+                <i class="fa-solid fa-check"></i>
+                Record Payment
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<style>
+
+.page-header {
+    margin-bottom: 25px;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 28px;
+    color: #0f172a;
+}
+
+.page-header p {
+    margin-top: 6px;
+    color: #64748b;
+}
+
+
+.alert-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    padding: 14px 18px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+
+.payment-card {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 8px 25px rgba(15, 23, 42, 0.06);
+    border: 1px solid #e5e7eb;
+}
+
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding-bottom: 22px;
+    margin-bottom: 25px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+
+.header-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+
+.card-header h2 {
+    margin: 0;
+    font-size: 20px;
+    color: #0f172a;
+}
+
+
+.card-header p {
+    margin: 5px 0 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+}
+
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+
+.form-group label {
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+
+.form-group label span {
+    color: #ef4444;
+}
+
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 13px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    font-size: 14px;
+    color: #0f172a;
+    background: white;
+    outline: none;
+    transition: 0.2s;
+}
+
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+
+.form-group textarea {
+    resize: vertical;
+}
+
+
+.input-icon {
+    position: relative;
+}
+
+
+.input-icon i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+}
+
+
+.input-icon input {
+    padding-left: 38px;
+}
+
+
+.form-group small {
+    margin-top: 7px;
+    color: #64748b;
+    font-size: 12px;
+}
+
+
+.no-invoice {
+    color: #dc2626 !important;
+}
+
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 30px;
+    padding-top: 22px;
+    border-top: 1px solid #e5e7eb;
+}
+
+
+.btn-cancel,
+.btn-submit {
+    border: none;
+    border-radius: 9px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+
+.btn-cancel {
+    background: #f1f5f9;
+    color: #334155;
+}
+
+
+.btn-cancel:hover {
+    background: #e2e8f0;
+}
+
+
+.btn-submit {
+    background: #2563eb;
+    color: white;
+}
+
+
+.btn-submit:hover {
+    background: #1d4ed8;
+}
+
+
+@media (max-width: 768px) {
+
+    .payment-card {
+        padding: 20px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .full-width {
+        grid-column: auto;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn-cancel,
+    .btn-submit {
+        justify-content: center;
+    }
+}
+
+</style>
+
+
+<script>
+
+function updateAmount() {
+
+    const invoiceSelect = document.getElementById("invoice");
+    const amountInfo = document.getElementById("invoiceAmount");
+
+    const selectedOption =
+        invoiceSelect.options[invoiceSelect.selectedIndex];
+
+    if (!selectedOption || !selectedOption.value) {
+
+        amountInfo.textContent =
+            "Select an invoice to view the total.";
+
+        return;
+    }
+
+    const total = selectedOption.dataset.total;
+
+    amountInfo.textContent =
+        "Invoice total: ₹" + parseFloat(total).toFixed(2);
+}
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,871 @@
+{% extends "base.html" %}
+
+{% block title %}Payments{% endblock %}
+
+{% block page_title %}Payments{% endblock %}
+
+{% block content %}
+
+<div class="payments-page">
+
+    <!-- Header -->
+    <div class="page-header">
+        <div>
+            <h1>Payments</h1>
+            <p>Track and manage customer payment transactions.</p>
+        </div>
+
+        <a href="{% url 'add_payment' %}" class="add-btn">
+            <i class="fa-solid fa-plus"></i>
+            Record Payment
+        </a>
+    </div>
+
+    <!-- Payment Summary -->
+<div class="payment-summary">
+
+    <div class="summary-card">
+        <div class="summary-icon total">
+            <i class="fa-solid fa-wallet"></i>
+        </div>
+
+        <div>
+            <span>Total Payments</span>
+            <h3>₹{{ total_payment_amount|floatformat:2 }}</h3>
+        </div>
+    </div>
+
+
+    <div class="summary-card">
+        <div class="summary-icon cash">
+            <i class="fa-solid fa-money-bill"></i>
+        </div>
+
+        <div>
+            <span>Cash Payments</span>
+            <h3>₹{{ cash_total|floatformat:2 }}</h3>
+        </div>
+    </div>
+
+
+    <div class="summary-card">
+        <div class="summary-icon upi">
+            <i class="fa-solid fa-mobile-screen-button"></i>
+        </div>
+
+        <div>
+            <span>UPI Payments</span>
+            <h3>₹{{ upi_total|floatformat:2 }}</h3>
+        </div>
+    </div>
+
+
+    <div class="summary-card">
+        <div class="summary-icon card">
+            <i class="fa-solid fa-credit-card"></i>
+        </div>
+
+        <div>
+            <span>Card Payments</span>
+            <h3>₹{{ card_total|floatformat:2 }}</h3>
+        </div>
+    </div>
+
+</div>
+
+    <!-- Search & Filter -->
+    <div class="filter-card">
+
+        <form method="GET" class="filter-form">
+
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ search }}"
+                    placeholder="Search invoice or customer..."
+                >
+            </div>
+
+
+            <select name="payment_method">
+
+                <option value="">All Payment Methods</option>
+
+                <option value="Cash"
+                    {% if payment_method == "Cash" %}selected{% endif %}>
+                    Cash
+                </option>
+
+                <option value="Card"
+                    {% if payment_method == "Card" %}selected{% endif %}>
+                    Card
+                </option>
+
+                <option value="UPI"
+                    {% if payment_method == "UPI" %}selected{% endif %}>
+                    UPI
+                </option>
+
+                <option value="Bank Transfer"
+                    {% if payment_method == "Bank Transfer" %}selected{% endif %}>
+                    Bank Transfer
+                </option>
+
+            </select>
+
+
+            <button type="submit" class="filter-btn">
+                <i class="fa-solid fa-filter"></i>
+                Filter
+            </button>
+
+
+            <a href="{% url 'payments' %}" class="clear-btn">
+                Clear
+            </a>
+
+        </form>
+
+    </div>
+
+
+    <!-- Payment Table -->
+    <div class="table-card">
+
+        <div class="table-header">
+
+            <div>
+                <h2>Payment History</h2>
+
+                <p>
+                    {% if payments %}
+                        {{ payments|length }} payment(s) found
+                    {% else %}
+                        No payments found
+                    {% endif %}
+                </p>
+            </div>
+
+        </div>
+
+
+        {% if payments %}
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Invoice</th>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Payment Method</th>
+                        <th>Date</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+
+
+                <tbody>
+
+                    {% for payment in payments %}
+
+                    <tr>
+
+                        <!-- Invoice -->
+                        <td>
+
+                            <a
+                                href="{% url 'invoice_detail' payment.invoice.id %}"
+                                class="invoice-link"
+                            >
+                                {{ payment.invoice.invoice_number }}
+                            </a>
+
+                        </td>
+
+
+                        <!-- Customer -->
+                        <td>
+
+                            <div class="customer-info">
+
+                                <div class="customer-icon">
+                                    <i class="fa-solid fa-user"></i>
+                                </div>
+
+                                <span>
+                                    {{ payment.invoice.customer.name }}
+                                </span>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- Amount -->
+                        <td>
+
+                            <strong class="payment-amount">
+                                ₹{{ payment.amount|floatformat:2 }}
+                            </strong>
+
+                        </td>
+
+
+                        <!-- Method -->
+                        <td>
+
+                            {% if payment.payment_method == "Cash" %}
+
+                            <span class="method cash">
+                                <i class="fa-solid fa-money-bill"></i>
+                                Cash
+                            </span>
+
+                            {% elif payment.payment_method == "Card" %}
+
+                            <span class="method card">
+                                <i class="fa-solid fa-credit-card"></i>
+                                Card
+                            </span>
+
+                            {% elif payment.payment_method == "UPI" %}
+
+                            <span class="method upi">
+                                <i class="fa-solid fa-mobile-screen-button"></i>
+                                UPI
+                            </span>
+
+                            {% else %}
+
+                            <span class="method bank">
+                                <i class="fa-solid fa-building-columns"></i>
+                                Bank Transfer
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Date -->
+                        <td>
+                            {{ payment.payment_date|date:"d M Y, h:i A" }}
+                        </td>
+
+
+                        <!-- Notes -->
+                        <td>
+
+                            {% if payment.notes %}
+                                <span class="notes">
+                                    {{ payment.notes|truncatechars:35 }}
+                                </span>
+                            {% else %}
+                                <span class="no-notes">
+                                    No notes
+                                </span>
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <!-- Empty State -->
+
+        <div class="empty-state">
+
+            <div class="empty-icon">
+                <i class="fa-solid fa-money-bill-wave"></i>
+            </div>
+
+            <h3>No payments found</h3>
+
+            <p>
+                {% if search or payment_method %}
+                    Try changing your search or filter.
+                {% else %}
+                    Record your first payment to get started.
+                {% endif %}
+            </p>
+
+            {% if not search and not payment_method %}
+
+            <a href="{% url 'add_payment' %}" class="empty-btn">
+                <i class="fa-solid fa-plus"></i>
+                Record Payment
+            </a>
+
+            {% endif %}
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<style>
+
+/* Page */
+
+.payments-page {
+    max-width: 1400px;
+    margin: auto;
+}
+
+/* Payment Summary */
+
+.payment-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.summary-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 5px 18px rgba(15, 23, 42, 0.04);
+    transition: 0.2s ease;
+}
+
+.summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+}
+
+.summary-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    flex-shrink: 0;
+}
+
+.summary-icon.total {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.summary-icon.cash {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.summary-icon.upi {
+    background: #f5f3ff;
+    color: #7c3aed;
+}
+
+.summary-icon.card {
+    background: #fff7ed;
+    color: #ea580c;
+}
+
+.summary-card span {
+    display: block;
+    color: #64748b;
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.summary-card h3 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 20px;
+}
+
+/* Header */
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+.page-header h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 28px;
+}
+
+.page-header p {
+    margin: 6px 0 0;
+    color: #64748b;
+}
+
+
+.add-btn {
+    background: #2563eb;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 9px;
+    text-decoration: none;
+    font-weight: 600;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.add-btn:hover {
+    background: #1d4ed8;
+}
+
+
+/* Filter */
+
+.filter-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 13px;
+    padding: 18px;
+    margin-bottom: 20px;
+}
+
+
+.filter-form {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+
+.search-box {
+    position: relative;
+    flex: 1;
+}
+
+
+.search-box i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+
+.search-box input,
+.filter-form select {
+    height: 44px;
+    box-sizing: border-box;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+
+    outline: none;
+    background: white;
+
+    font-size: 14px;
+}
+
+
+.search-box input {
+    width: 100%;
+    padding: 0 14px 0 40px;
+}
+
+
+.filter-form select {
+    min-width: 180px;
+    padding: 0 12px;
+}
+
+
+.search-box input:focus,
+.filter-form select:focus {
+    border-color: #2563eb;
+
+    box-shadow:
+        0 0 0 3px rgba(37, 99, 235, .1);
+}
+
+
+.filter-btn,
+.clear-btn {
+    height: 44px;
+
+    padding: 0 17px;
+
+    border-radius: 8px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    font-weight: 600;
+    font-size: 13px;
+
+    text-decoration: none;
+
+    cursor: pointer;
+}
+
+
+.filter-btn {
+    border: none;
+
+    background: #2563eb;
+    color: white;
+}
+
+
+.filter-btn:hover {
+    background: #1d4ed8;
+}
+
+
+.clear-btn {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+
+/* Table */
+
+.table-card {
+    background: white;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 15px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 6px 20px rgba(15, 23, 42, .04);
+}
+
+
+.table-header {
+    padding: 20px 22px;
+
+    border-bottom: 1px solid #e5e7eb;
+}
+
+
+.table-header h2 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 18px;
+}
+
+
+.table-header p {
+    margin: 5px 0 0;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+
+table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    min-width: 950px;
+}
+
+
+thead {
+    background: #f8fafc;
+}
+
+
+th {
+    padding: 14px 16px;
+
+    text-align: left;
+
+    color: #64748b;
+
+    font-size: 11px;
+
+    text-transform: uppercase;
+
+    letter-spacing: .4px;
+
+    white-space: nowrap;
+}
+
+
+td {
+    padding: 15px 16px;
+
+    border-top: 1px solid #f1f5f9;
+
+    color: #334155;
+
+    font-size: 13px;
+
+    white-space: nowrap;
+}
+
+
+tr:hover td {
+    background: #f8fafc;
+}
+
+
+/* Invoice */
+
+.invoice-link {
+    color: #2563eb;
+
+    font-weight: 700;
+
+    text-decoration: none;
+}
+
+
+.invoice-link:hover {
+    text-decoration: underline;
+}
+
+
+/* Customer */
+
+.customer-info {
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+}
+
+
+.customer-icon {
+    width: 32px;
+    height: 32px;
+
+    border-radius: 8px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 12px;
+}
+
+
+/* Amount */
+
+.payment-amount {
+    color: #15803d;
+
+    font-size: 14px;
+}
+
+
+/* Payment Method */
+
+.method {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 6px 10px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+
+.method.cash {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+
+.method.card {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+
+.method.upi {
+    background: #f5f3ff;
+    color: #7c3aed;
+}
+
+
+.method.bank {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+
+/* Notes */
+
+.notes {
+    color: #475569;
+}
+
+
+.no-notes {
+    color: #94a3b8;
+
+    font-style: italic;
+
+    font-size: 12px;
+}
+
+
+/* Empty */
+
+.empty-state {
+    text-align: center;
+
+    padding: 70px 20px;
+}
+
+
+.empty-icon {
+    width: 65px;
+    height: 65px;
+
+    margin: 0 auto 15px;
+
+    border-radius: 15px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 25px;
+}
+
+
+.empty-state h3 {
+    margin: 0;
+
+    color: #0f172a;
+}
+
+
+.empty-state p {
+    color: #64748b;
+
+    margin: 8px 0 20px;
+}
+
+
+.empty-btn {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    background: #2563eb;
+
+    color: white;
+
+    padding: 11px 17px;
+
+    border-radius: 8px;
+
+    text-decoration: none;
+
+    font-weight: 600;
+}
+
+
+/* Responsive */
+
+@media (max-width: 850px) {
+
+    .filter-form {
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        flex-basis: 100%;
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .page-header {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 15px;
+    }
+
+
+    .filter-form {
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+
+    .filter-form select,
+    .filter-btn,
+    .clear-btn {
+        width: 100%;
+    }
+
+}
+
+</style>
+
+{% endblock %}

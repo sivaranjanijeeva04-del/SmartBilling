@@ -1,0 +1,345 @@
+{% extends "base.html" %}
+
+{% block title %}Add Customer - SmartBilling{% endblock %}
+
+{% block content %}
+
+<style>
+    .customer-page {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        margin-bottom: 25px;
+    }
+
+    .page-header h1 {
+        font-size: 28px;
+        margin-bottom: 6px;
+        color: #1f2937;
+    }
+
+    .page-header p {
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    .customer-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 22px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 8px;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        font-size: 14px;
+        outline: none;
+        transition: 0.2s;
+        box-sizing: border-box;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .form-group textarea {
+        min-height: 110px;
+        resize: vertical;
+    }
+
+    .required {
+        color: #dc2626;
+    }
+
+    .error-message {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #b91c1c;
+        padding: 12px 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+
+    .button-area {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 28px;
+        padding-top: 20px;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .btn {
+        padding: 12px 20px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+    }
+
+    .btn-cancel {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .btn-cancel:hover {
+        background: #e5e7eb;
+    }
+
+    .btn-save {
+        background: #2563eb;
+        color: white;
+    }
+
+    .btn-save:hover {
+        background: #1d4ed8;
+    }
+
+    .preview-card {
+        margin-top: 20px;
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 18px;
+    }
+
+    .preview-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 12px;
+    }
+
+    .preview-name {
+        font-size: 18px;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 6px;
+    }
+
+    .preview-details {
+        font-size: 13px;
+        color: #6b7280;
+        line-height: 1.7;
+    }
+
+    @media (max-width: 700px) {
+        .customer-card {
+            padding: 20px;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group.full-width {
+            grid-column: auto;
+        }
+
+        .button-area {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>
+
+<div class="customer-page">
+
+    <div class="page-header">
+        <h1>Add Customer</h1>
+        <p>Create a new customer record for billing and sales management.</p>
+    </div>
+
+    <div class="customer-card">
+
+        <div class="section-title">
+            Customer Information
+        </div>
+
+        {% if error %}
+            <div class="error-message">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                {{ error }}
+            </div>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="name">
+                        Customer Name <span class="required">*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        placeholder="Enter customer name"
+                        value="{{ request.POST.name }}"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">
+                        Phone Number <span class="required">*</span>
+                    </label>
+
+                    <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        placeholder="Enter phone number"
+                        value="{{ request.POST.phone }}"
+                        maxlength="15"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="email">
+                        Email Address
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter email address"
+                        value="{{ request.POST.email }}"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="address">
+                        Address
+                    </label>
+
+                    <textarea
+                        id="address"
+                        name="address"
+                        placeholder="Enter customer address"
+                    >{{ request.POST.address }}</textarea>
+                </div>
+
+            </div>
+
+            <div class="preview-card">
+                <div class="preview-title">
+                    Customer Preview
+                </div>
+
+                <div class="preview-name" id="previewName">
+                    Customer Name
+                </div>
+
+                <div class="preview-details">
+                    <div id="previewPhone">Phone: -</div>
+                    <div id="previewEmail">Email: -</div>
+                    <div id="previewAddress">Address: -</div>
+                </div>
+            </div>
+
+            <div class="button-area">
+
+                <a href="{% url 'customers' %}" class="btn btn-cancel">
+                    Cancel
+                </a>
+
+                <button type="submit" class="btn btn-save">
+                    <i class="fa-solid fa-user-plus"></i>
+                    Save Customer
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+    const nameInput = document.getElementById("name");
+    const phoneInput = document.getElementById("phone");
+    const emailInput = document.getElementById("email");
+    const addressInput = document.getElementById("address");
+
+    const previewName = document.getElementById("previewName");
+    const previewPhone = document.getElementById("previewPhone");
+    const previewEmail = document.getElementById("previewEmail");
+    const previewAddress = document.getElementById("previewAddress");
+
+    function updatePreview() {
+
+        previewName.textContent =
+            nameInput.value.trim() || "Customer Name";
+
+        previewPhone.textContent =
+            "Phone: " + (phoneInput.value.trim() || "-");
+
+        previewEmail.textContent =
+            "Email: " + (emailInput.value.trim() || "-");
+
+        previewAddress.textContent =
+            "Address: " + (addressInput.value.trim() || "-");
+    }
+
+    nameInput.addEventListener("input", updatePreview);
+    phoneInput.addEventListener("input", updatePreview);
+    emailInput.addEventListener("input", updatePreview);
+    addressInput.addEventListener("input", updatePreview);
+
+    updatePreview();
+</script>
+
+{% endblock %}

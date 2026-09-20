@@ -1,0 +1,480 @@
+{% extends "base.html" %}
+
+{% block title %}Invoices - SmartBilling{% endblock %}
+
+{% block content %}
+
+<style>
+    .invoice-page {
+        max-width: 1250px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        gap: 15px;
+    }
+
+    .page-header h1 {
+        font-size: 28px;
+        color: #1f2937;
+        margin-bottom: 6px;
+    }
+
+    .page-header p {
+        font-size: 14px;
+        color: #6b7280;
+    }
+
+    .add-btn {
+        background: #2563eb;
+        color: white;
+        padding: 12px 18px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .add-btn:hover {
+        background: #1d4ed8;
+    }
+
+    .filter-card {
+        background: #ffffff;
+        border-radius: 14px;
+        padding: 18px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.05);
+    }
+
+    .filter-form {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        flex: 1;
+        min-width: 250px;
+    }
+
+    .filter-form input,
+    .filter-form select {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 11px 13px;
+        border: 1px solid #d1d5db;
+        border-radius: 9px;
+        font-size: 14px;
+        outline: none;
+    }
+
+    .filter-form input:focus,
+    .filter-form select:focus {
+        border-color: #2563eb;
+    }
+
+    .filter-btn {
+        background: #111827;
+        color: white;
+        border: none;
+        padding: 11px 18px;
+        border-radius: 9px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .clear-btn {
+        background: #f3f4f6;
+        color: #374151;
+        padding: 11px 18px;
+        border-radius: 9px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .table-card {
+        background: white;
+        border-radius: 14px;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1100px;
+    }
+
+    thead {
+        background: #f8fafc;
+    }
+
+    th {
+        padding: 14px;
+        text-align: left;
+        font-size: 12px;
+        color: #475569;
+        font-weight: 700;
+        text-transform: uppercase;
+        border-bottom: 1px solid #e5e7eb;
+        white-space: nowrap;
+    }
+
+    td {
+        padding: 15px 14px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 13px;
+        color: #374151;
+        white-space: nowrap;
+    }
+
+    tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .invoice-number {
+        font-weight: 700;
+        color: #2563eb;
+    }
+
+    .customer-name {
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .amount {
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .balance {
+        font-weight: 700;
+    }
+
+    .balance-paid {
+        color: #15803d;
+    }
+
+    .balance-due {
+        color: #dc2626;
+    }
+
+    .status {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .status-paid {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-partial {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-pending {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .items-count {
+        background: #f1f5f9;
+        color: #475569;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .view-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #eff6ff;
+        color: #2563eb;
+        padding: 8px 12px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .view-btn:hover {
+        background: #dbeafe;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 55px 20px;
+        color: #6b7280;
+    }
+
+    .empty-state i {
+        font-size: 38px;
+        margin-bottom: 12px;
+        color: #9ca3af;
+    }
+
+    .empty-state h3 {
+        color: #374151;
+        margin-bottom: 6px;
+    }
+
+    @media (max-width: 750px) {
+
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .add-btn {
+            width: 100%;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .filter-form {
+            flex-direction: column;
+        }
+
+        .search-box {
+            min-width: 100%;
+        }
+
+        .filter-btn,
+        .clear-btn {
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>
+
+<div class="invoice-page">
+
+    <div class="page-header">
+        <div>
+            <h1>Invoices</h1>
+            <p>Manage invoices, payments and outstanding balances.</p>
+        </div>
+
+        <a href="{% url 'add_invoice' %}" class="add-btn">
+            <i class="fa-solid fa-plus"></i>
+            Create Invoice
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-card">
+
+        <form method="GET" class="filter-form">
+
+            <div class="search-box">
+                <input
+                    type="text"
+                    name="search"
+                    placeholder="Search invoice number or customer..."
+                    value="{{ search }}"
+                >
+            </div>
+
+            <div>
+                <select name="status">
+                    <option value="">All Status</option>
+
+                    <option value="Paid"
+                        {% if status == "Paid" %}selected{% endif %}>
+                        Paid
+                    </option>
+
+                    <option value="Partial"
+                        {% if status == "Partial" %}selected{% endif %}>
+                        Partial
+                    </option>
+
+                    <option value="Pending"
+                        {% if status == "Pending" %}selected{% endif %}>
+                        Pending
+                    </option>
+                </select>
+            </div>
+
+            <button type="submit" class="filter-btn">
+                <i class="fa-solid fa-filter"></i>
+                Filter
+            </button>
+
+            <a href="{% url 'invoices' %}" class="clear-btn">
+                Clear
+            </a>
+
+        </form>
+
+    </div>
+
+    <!-- Invoice Table -->
+    <div class="table-card">
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Invoice</th>
+                        <th>Customer</th>
+                        <th>Items</th>
+                        <th>Subtotal</th>
+                        <th>Discount</th>
+                        <th>Tax</th>
+                        <th>Total</th>
+                        <th>Paid</th>
+                        <th>Balance</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for invoice in invoices %}
+
+                    <tr>
+
+                        <td>
+                            <span class="invoice-number">
+                                {{ invoice.invoice_number }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="customer-name">
+                                {{ invoice.customer.name }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="items-count">
+                                {{ invoice.items.count }} item{{ invoice.items.count|pluralize }}
+                            </span>
+                        </td>
+
+                        <td>
+                            ₹{{ invoice.subtotal|floatformat:2 }}
+                        </td>
+
+                        <td>
+                            ₹{{ invoice.discount|floatformat:2 }}
+                        </td>
+
+                        <td>
+                            ₹{{ invoice.tax|floatformat:2 }}
+                        </td>
+
+                        <td class="amount">
+                            ₹{{ invoice.grand_total|floatformat:2 }}
+                        </td>
+
+                        <td>
+                            ₹{{ invoice.paid_amount|floatformat:2 }}
+                        </td>
+
+                        <td
+                            class="balance
+                            {% if invoice.remaining_amount == 0 %}
+                                balance-paid
+                            {% else %}
+                                balance-due
+                            {% endif %}"
+                        >
+                            ₹{{ invoice.remaining_amount|floatformat:2 }}
+                        </td>
+
+                        <td>
+
+                            {% if invoice.display_status == "Paid" %}
+
+                                <span class="status status-paid">
+                                    Paid
+                                </span>
+
+                            {% elif invoice.display_status == "Partial" %}
+
+                                <span class="status status-partial">
+                                    Partial
+                                </span>
+
+                            {% else %}
+
+                                <span class="status status-pending">
+                                    Pending
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            {{ invoice.invoice_date|date:"d M Y, h:i A" }}
+                        </td>
+
+                        <td>
+                            <a
+                                href="{% url 'invoice_detail' invoice.id %}"
+                                class="view-btn"
+                            >
+                                <i class="fa-solid fa-eye"></i>
+                                View
+                            </a>
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+                        <td colspan="12">
+
+                            <div class="empty-state">
+
+                                <i class="fa-solid fa-file-invoice"></i>
+
+                                <h3>No invoices found</h3>
+
+                                <p>
+                                    Create your first invoice to see it here.
+                                </p>
+
+                            </div>
+
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

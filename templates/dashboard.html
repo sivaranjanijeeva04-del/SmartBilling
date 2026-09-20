@@ -1,0 +1,1679 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-page">
+
+    <!-- ==================================================
+         WELCOME
+    ================================================== -->
+
+    <div class="welcome-section">
+
+        <div>
+            <h1>
+                Welcome back, {{ request.user.username }}!
+            </h1>
+
+            <p>
+                Here's what's happening with your billing system today.
+            </p>
+        </div>
+
+        <a
+            href="{% url 'add_invoice' %}"
+            class="create-invoice-btn"
+        >
+            <i class="fa-solid fa-plus"></i>
+            Create Invoice
+        </a>
+
+    </div>
+
+
+    <!-- ==================================================
+         STATISTICS
+    ================================================== -->
+
+    <div class="stats-grid">
+
+        <!-- Products -->
+
+        <div class="stat-card">
+
+            <div class="stat-content">
+
+                <span>Total Products</span>
+
+                <h2>
+                    {{ total_products }}
+                </h2>
+
+                <p>
+                    Products in inventory
+                </p>
+
+            </div>
+
+            <div class="stat-icon blue">
+                <i class="fa-solid fa-box"></i>
+            </div>
+
+        </div>
+
+
+        <!-- Customers -->
+
+        <div class="stat-card">
+
+            <div class="stat-content">
+
+                <span>Total Customers</span>
+
+                <h2>
+                    {{ total_customers }}
+                </h2>
+
+                <p>
+                    Registered customers
+                </p>
+
+            </div>
+
+            <div class="stat-icon purple">
+                <i class="fa-solid fa-users"></i>
+            </div>
+
+        </div>
+
+
+        <!-- Invoices -->
+
+        <div class="stat-card">
+
+            <div class="stat-content">
+
+                <span>Total Invoices</span>
+
+                <h2>
+                    {{ total_invoices }}
+                </h2>
+
+                <p>
+                    Invoices generated
+                </p>
+
+            </div>
+
+            <div class="stat-icon orange">
+                <i class="fa-solid fa-file-invoice"></i>
+            </div>
+
+        </div>
+
+
+        <!-- Revenue -->
+
+        <div class="stat-card">
+
+            <div class="stat-content">
+
+                <span>Total Revenue</span>
+
+                <h2>
+                    ₹{{ total_revenue|floatformat:2 }}
+                </h2>
+
+                <p>
+                    Revenue from paid invoices
+                </p>
+
+            </div>
+
+            <div class="stat-icon green">
+                <i class="fa-solid fa-indian-rupee-sign"></i>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         FINANCIAL SUMMARY
+    ================================================== -->
+
+    <div class="summary-grid">
+
+        <!-- Total Paid -->
+
+        <div class="summary-card paid-card">
+
+            <div class="summary-icon">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    Total Paid
+                </span>
+
+                <h3>
+                    ₹{{ total_paid|floatformat:2 }}
+                </h3>
+
+                <p>
+                    Payments received
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- Pending -->
+
+        <div class="summary-card pending-card">
+
+            <div class="summary-icon">
+                <i class="fa-solid fa-clock"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    Pending Amount
+                </span>
+
+                <h3>
+                    ₹{{ pending_amount|floatformat:2 }}
+                </h3>
+
+                <p>
+                    Outstanding payments
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         ALERT / BUSINESS OVERVIEW
+    ================================================== -->
+
+    <div class="overview-grid">
+
+        <!-- Low Stock -->
+
+        <div class="overview-card warning-overview">
+
+            <div class="overview-icon orange-icon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    Low Stock
+                </span>
+
+                <strong>
+                    {{ low_stock_products|length }}
+                </strong>
+
+                <small>
+                    Products need attention
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <!-- Pending Invoices -->
+
+        <div class="overview-card pending-overview">
+
+            <div class="overview-icon red-icon">
+                <i class="fa-solid fa-clock"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    Pending Invoices
+                </span>
+
+                <strong>
+                    {{ pending_invoices|length }}
+                </strong>
+
+                <small>
+                    Awaiting payment
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <!-- Payments -->
+
+        <div class="overview-card payment-overview">
+
+            <div class="overview-icon green-icon">
+                <i class="fa-solid fa-wallet"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    Payments
+                </span>
+
+                <strong>
+                    {{ total_payments }}
+                </strong>
+
+                <small>
+                    Transactions recorded
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <!-- Sales History -->
+
+        <div class="overview-card sales-overview">
+
+            <div class="overview-icon blue-icon">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    Sales History
+                </span>
+
+                <strong>
+                    View
+                </strong>
+
+                <small>
+                    Review all sales
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         LOW STOCK + PENDING PAYMENTS
+    ================================================== -->
+
+    <div class="attention-grid">
+
+        <!-- Low Stock Products -->
+
+        <div class="attention-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h2>
+                        Low Stock Products
+                    </h2>
+
+                    <p>
+                        Products with limited inventory.
+                    </p>
+
+                </div>
+
+                <a href="{% url 'products' %}">
+                    View Products
+                </a>
+
+            </div>
+
+
+            {% if low_stock_products %}
+
+            <div class="stock-list">
+
+                {% for product in low_stock_products %}
+
+                <div class="stock-item">
+
+                    <div class="stock-icon">
+                        <i class="fa-solid fa-box"></i>
+                    </div>
+
+
+                    <div class="stock-info">
+
+                        <strong>
+                            {{ product.name }}
+                        </strong>
+
+                        <span>
+                            {{ product.category }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="stock-count">
+
+                        {% if product.stock == 0 %}
+
+                            <strong class="out-stock">
+                                Out of Stock
+                            </strong>
+
+                        {% else %}
+
+                            <strong class="low-stock">
+                                {{ product.stock }} left
+                            </strong>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% else %}
+
+            <div class="empty-small">
+
+                <i class="fa-solid fa-circle-check"></i>
+
+                <p>
+                    All products have healthy stock levels.
+                </p>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- Pending Payments -->
+
+        <div class="attention-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h2>
+                        Pending Payments
+                    </h2>
+
+                    <p>
+                        Invoices awaiting customer payment.
+                    </p>
+
+                </div>
+
+                <a href="{% url 'payments' %}">
+                    View Payments
+                </a>
+
+            </div>
+
+
+            {% if pending_invoices %}
+
+            <div class="pending-list">
+
+                {% for invoice in pending_invoices %}
+
+                <div class="pending-item">
+
+                    <div class="pending-icon">
+                        <i class="fa-solid fa-file-invoice"></i>
+                    </div>
+
+
+                    <div class="pending-info">
+
+                        <a
+                            href="{% url 'invoice_detail' invoice.id %}"
+                        >
+                            {{ invoice.invoice_number }}
+                        </a>
+
+                        <span>
+                            {{ invoice.customer.name }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="pending-amount">
+
+                        <strong>
+                            ₹{{ invoice.remaining_amount|floatformat:2 }}
+                        </strong>
+
+                        <span>
+                            {{ invoice.payment_status }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% else %}
+
+            <div class="empty-small">
+
+                <i class="fa-solid fa-circle-check"></i>
+
+                <p>
+                    No pending payments.
+                </p>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         RECENT ACTIVITY
+    ================================================== -->
+
+    <div class="activity-grid">
+
+        <!-- Recent Invoices -->
+
+        <div class="activity-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h2>
+                        Recent Invoices
+                    </h2>
+
+                    <p>
+                        Latest invoices created
+                    </p>
+
+                </div>
+
+                <a href="{% url 'invoices' %}">
+                    View All
+                </a>
+
+            </div>
+
+
+            {% if recent_invoices %}
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Invoice
+                            </th>
+
+                            <th>
+                                Customer
+                            </th>
+
+                            <th>
+                                Amount
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for invoice in recent_invoices %}
+
+                        <tr>
+
+                            <td>
+
+                                <a
+                                    href="{% url 'invoice_detail' invoice.id %}"
+                                    class="invoice-link"
+                                >
+                                    {{ invoice.invoice_number }}
+                                </a>
+
+                            </td>
+
+
+                            <td>
+                                {{ invoice.customer.name }}
+                            </td>
+
+
+                            <td>
+                                ₹{{ invoice.grand_total|floatformat:2 }}
+                            </td>
+
+
+                            <td>
+
+                                {% if invoice.payment_status == "Paid" %}
+
+                                    <span class="status paid">
+                                        Paid
+                                    </span>
+
+                                {% elif invoice.payment_status == "Partial" %}
+
+                                    <span class="status partial">
+                                        Partial
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="status pending">
+                                        Pending
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% else %}
+
+            <div class="empty-state">
+
+                <i class="fa-solid fa-file-invoice"></i>
+
+                <p>
+                    No invoices available yet.
+                </p>
+
+                <a href="{% url 'add_invoice' %}">
+                    Create your first invoice
+                </a>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- Recent Payments -->
+
+        <div class="activity-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h2>
+                        Recent Payments
+                    </h2>
+
+                    <p>
+                        Latest payments received
+                    </p>
+
+                </div>
+
+                <a href="{% url 'payments' %}">
+                    View All
+                </a>
+
+            </div>
+
+
+            {% if recent_payments %}
+
+            <div class="payment-list">
+
+                {% for payment in recent_payments %}
+
+                <div class="payment-item">
+
+                    <div class="payment-icon">
+
+                        <i class="fa-solid fa-money-bill-wave"></i>
+
+                    </div>
+
+
+                    <div class="payment-info">
+
+                        <strong>
+                            {{ payment.invoice.invoice_number }}
+                        </strong>
+
+                        <span>
+                            {{ payment.invoice.customer.name }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="payment-amount">
+
+                        <strong>
+                            ₹{{ payment.amount|floatformat:2 }}
+                        </strong>
+
+                        <span>
+                            {{ payment.payment_method }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% else %}
+
+            <div class="empty-state">
+
+                <i class="fa-solid fa-money-bill-wave"></i>
+
+                <p>
+                    No payments recorded yet.
+                </p>
+
+                <a href="{% url 'add_payment' %}">
+                    Record Payment
+                </a>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         QUICK ACTIONS
+    ================================================== -->
+
+    <div class="quick-actions">
+
+        <h2>
+            Quick Actions
+        </h2>
+
+        <div class="action-grid">
+
+            <!-- Add Product -->
+
+            <a
+                href="{% url 'add_product' %}"
+                class="action-card"
+            >
+
+                <div class="action-icon blue">
+                    <i class="fa-solid fa-box"></i>
+                </div>
+
+                <div>
+
+                    <strong>
+                        Add Product
+                    </strong>
+
+                    <span>
+                        Add a new product to inventory
+                    </span>
+
+                </div>
+
+                <i class="fa-solid fa-arrow-right arrow"></i>
+
+            </a>
+
+
+            <!-- Add Customer -->
+
+            <a
+                href="{% url 'add_customer' %}"
+                class="action-card"
+            >
+
+                <div class="action-icon purple">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
+
+                <div>
+
+                    <strong>
+                        Add Customer
+                    </strong>
+
+                    <span>
+                        Create a new customer record
+                    </span>
+
+                </div>
+
+                <i class="fa-solid fa-arrow-right arrow"></i>
+
+            </a>
+
+
+            <!-- Create Invoice -->
+
+            <a
+                href="{% url 'add_invoice' %}"
+                class="action-card"
+            >
+
+                <div class="action-icon orange">
+                    <i class="fa-solid fa-file-circle-plus"></i>
+                </div>
+
+                <div>
+
+                    <strong>
+                        Create Invoice
+                    </strong>
+
+                    <span>
+                        Generate a new customer invoice
+                    </span>
+
+                </div>
+
+                <i class="fa-solid fa-arrow-right arrow"></i>
+
+            </a>
+
+
+            <!-- Record Payment -->
+
+            <a
+                href="{% url 'add_payment' %}"
+                class="action-card"
+            >
+
+                <div class="action-icon green">
+                    <i class="fa-solid fa-credit-card"></i>
+                </div>
+
+                <div>
+
+                    <strong>
+                        Record Payment
+                    </strong>
+
+                    <span>
+                        Record a customer payment
+                    </span>
+
+                </div>
+
+                <i class="fa-solid fa-arrow-right arrow"></i>
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+
+/* ==================================================
+   PAGE
+================================================== */
+
+.dashboard-page {
+    max-width: 1400px;
+    margin: auto;
+}
+
+
+/* ==================================================
+   WELCOME
+================================================== */
+
+.welcome-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    gap: 20px;
+}
+
+.welcome-section h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 28px;
+}
+
+.welcome-section p {
+    margin: 7px 0 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.create-invoice-btn {
+    background: #2563eb;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 9px;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.create-invoice-btn:hover {
+    background: #1d4ed8;
+}
+
+
+/* ==================================================
+   STATS
+================================================== */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.stat-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 15px;
+    padding: 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
+    transition: 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+}
+
+.stat-content span {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.stat-content h2 {
+    margin: 9px 0 5px;
+    color: #0f172a;
+    font-size: 27px;
+}
+
+.stat-content p {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+.stat-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 11px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.stat-icon.blue,
+.action-icon.blue {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.stat-icon.purple,
+.action-icon.purple {
+    background: #f5f3ff;
+    color: #7c3aed;
+}
+
+.stat-icon.orange,
+.action-icon.orange {
+    background: #fff7ed;
+    color: #ea580c;
+}
+
+.stat-icon.green,
+.action-icon.green {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+
+/* ==================================================
+   FINANCIAL SUMMARY
+================================================== */
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.summary-card {
+    background: white;
+    border-radius: 15px;
+    padding: 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border: 1px solid #e5e7eb;
+}
+
+.summary-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+}
+
+.paid-card .summary-icon {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.pending-card .summary-icon {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.summary-card span {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.summary-card h3 {
+    margin: 5px 0;
+    font-size: 24px;
+    color: #0f172a;
+}
+
+.summary-card p {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+
+/* ==================================================
+   OVERVIEW
+================================================== */
+
+.overview-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.overview-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
+}
+
+.overview-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.orange-icon {
+    background: #fff7ed;
+    color: #ea580c;
+}
+
+.red-icon {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.green-icon {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+.blue-icon {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.overview-card span {
+    display: block;
+    color: #64748b;
+    font-size: 11px;
+}
+
+.overview-card strong {
+    display: block;
+    margin-top: 3px;
+    color: #0f172a;
+    font-size: 18px;
+}
+
+.overview-card small {
+    display: block;
+    margin-top: 3px;
+    color: #94a3b8;
+    font-size: 10px;
+}
+
+
+/* ==================================================
+   ATTENTION
+================================================== */
+
+.attention-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.attention-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 18px rgba(15, 23, 42, .04);
+}
+
+.attention-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 22px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.attention-card .card-header h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 17px;
+}
+
+.attention-card .card-header p {
+    margin: 5px 0 0;
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+.attention-card .card-header a {
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+
+/* Low Stock */
+
+.stock-list {
+    padding: 5px 20px;
+}
+
+.stock-item {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 14px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.stock-item:last-child {
+    border-bottom: none;
+}
+
+.stock-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff7ed;
+    color: #ea580c;
+}
+
+.stock-info {
+    flex: 1;
+}
+
+.stock-info strong {
+    display: block;
+    color: #0f172a;
+    font-size: 12px;
+}
+
+.stock-info span {
+    display: block;
+    margin-top: 3px;
+    color: #94a3b8;
+    font-size: 10px;
+}
+
+.stock-count {
+    text-align: right;
+}
+
+.low-stock {
+    color: #ea580c;
+    font-size: 11px;
+}
+
+.out-stock {
+    color: #dc2626;
+    font-size: 11px;
+}
+
+
+/* Pending */
+
+.pending-list {
+    padding: 5px 20px;
+}
+
+.pending-item {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 14px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.pending-item:last-child {
+    border-bottom: none;
+}
+
+.pending-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.pending-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.pending-info a {
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.pending-info span {
+    color: #94a3b8;
+    font-size: 10px;
+}
+
+.pending-amount {
+    text-align: right;
+}
+
+.pending-amount strong {
+    display: block;
+    color: #dc2626;
+    font-size: 12px;
+}
+
+.pending-amount span {
+    display: block;
+    margin-top: 3px;
+    color: #94a3b8;
+    font-size: 10px;
+}
+
+
+/* Empty Small */
+
+.empty-small {
+    text-align: center;
+    padding: 35px 20px;
+    color: #94a3b8;
+}
+
+.empty-small i {
+    font-size: 25px;
+    color: #16a34a;
+    margin-bottom: 10px;
+}
+
+.empty-small p {
+    margin: 0;
+    font-size: 12px;
+}
+
+
+/* ==================================================
+   ACTIVITY
+================================================== */
+
+.activity-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 20px;
+    margin-top: 22px;
+}
+
+.activity-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 22px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.card-header h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 18px;
+}
+
+.card-header p {
+    margin: 5px 0 0;
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.card-header a {
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+
+/* Table */
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    padding: 13px 18px;
+    background: #f8fafc;
+    color: #64748b;
+    text-align: left;
+    font-size: 11px;
+}
+
+td {
+    padding: 15px 18px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    font-size: 12px;
+}
+
+tr:hover td {
+    background: #f8fafc;
+}
+
+.invoice-link {
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+
+/* Status */
+
+.status {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.status.paid {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.status.partial {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.status.pending {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+
+/* Payments */
+
+.payment-list {
+    padding: 8px 20px;
+}
+
+.payment-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.payment-item:last-child {
+    border-bottom: none;
+}
+
+.payment-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.payment-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.payment-info strong {
+    color: #0f172a;
+    font-size: 12px;
+}
+
+.payment-info span {
+    color: #94a3b8;
+    font-size: 10px;
+}
+
+.payment-amount {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.payment-amount strong {
+    color: #16a34a;
+    font-size: 12px;
+}
+
+.payment-amount span {
+    color: #94a3b8;
+    font-size: 10px;
+}
+
+
+/* Empty */
+
+.empty-state {
+    padding: 45px 20px;
+    text-align: center;
+    color: #94a3b8;
+}
+
+.empty-state i {
+    display: block;
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    margin: 0 0 12px;
+    font-size: 12px;
+}
+
+.empty-state a {
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+
+/* ==================================================
+   QUICK ACTIONS
+================================================== */
+
+.quick-actions {
+    margin-top: 25px;
+}
+
+.quick-actions h2 {
+    margin: 0 0 15px;
+    color: #0f172a;
+    font-size: 20px;
+}
+
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+
+.action-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 13px;
+    padding: 17px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    transition: 0.2s ease;
+}
+
+.action-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+.action-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.action-card div:nth-child(2) {
+    flex: 1;
+}
+
+.action-card strong {
+    display: block;
+    color: #0f172a;
+    font-size: 12px;
+}
+
+.action-card span {
+    display: block;
+    margin-top: 4px;
+    color: #94a3b8;
+    font-size: 10px;
+}
+
+.arrow {
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+
+/* ==================================================
+   RESPONSIVE
+================================================== */
+
+@media (max-width: 1100px) {
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .overview-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .action-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .activity-grid,
+    .attention-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .welcome-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .create-invoice-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .stats-grid,
+    .summary-grid,
+    .overview-grid,
+    .action-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card {
+        padding: 18px;
+    }
+
+    .attention-card .card-header {
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+}
+
+
+@media (max-width: 480px) {
+
+    .stat-card,
+    .summary-card,
+    .overview-card,
+    .action-card {
+        padding: 16px;
+    }
+
+}
+</style>
+
+{% endblock %}

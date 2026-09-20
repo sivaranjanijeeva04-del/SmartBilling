@@ -1,0 +1,696 @@
+{% extends "base.html" %}
+
+{% block title %}Customers{% endblock %}
+
+{% block page_title %}Customers{% endblock %}
+
+{% block content %}
+
+<div class="customers-page">
+
+    <!-- Header -->
+    <div class="page-header">
+
+        <div>
+            <h1>Customers</h1>
+            <p>Manage customer information and billing records.</p>
+        </div>
+
+        <a href="{% url 'add_customer' %}" class="add-customer-btn">
+            <i class="fa-solid fa-user-plus"></i>
+            Add Customer
+        </a>
+
+    </div>
+
+
+    <!-- Filter -->
+    <div class="filter-card">
+
+        <form method="GET" class="filter-form">
+
+            <div class="search-box">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ search }}"
+                    placeholder="Search name, email or phone..."
+                >
+
+            </div>
+
+            <button type="submit" class="filter-btn">
+                <i class="fa-solid fa-filter"></i>
+                Search
+            </button>
+
+            <a href="{% url 'customers' %}" class="clear-btn">
+                Clear
+            </a>
+
+        </form>
+
+    </div>
+
+
+    <!-- Customer Table -->
+    <div class="table-card">
+
+        <div class="table-header">
+
+            <div>
+                <h2>Customer Directory</h2>
+
+                <p>
+                    {% if customers %}
+                        {{ customers|length }} customer(s) found
+                    {% else %}
+                        No customers found
+                    {% endif %}
+                </p>
+            </div>
+
+        </div>
+
+
+        {% if customers %}
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Customer</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Address</th>
+                        <th>Registered</th>
+                        <th>Actions</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for customer in customers %}
+
+                    <tr>
+
+                        <!-- Customer -->
+
+                        <td>
+
+                            <div class="customer-info">
+
+                                <div class="customer-avatar">
+                                    <i class="fa-solid fa-user"></i>
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        {{ customer.name }}
+                                    </strong>
+
+                                    <span>
+                                        Customer ID #{{ customer.id }}
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- Email -->
+
+                        <td>
+
+                            {% if customer.email %}
+
+                                <span class="contact-info">
+                                    <i class="fa-solid fa-envelope"></i>
+                                    {{ customer.email }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="not-provided">
+                                    Not provided
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Phone -->
+
+                        <td>
+
+                            <span class="contact-info">
+                                <i class="fa-solid fa-phone"></i>
+                                {{ customer.phone }}
+                            </span>
+
+                        </td>
+
+
+                        <!-- Address -->
+
+                        <td>
+
+                            {% if customer.address %}
+
+                                <span class="address-text">
+                                    {{ customer.address|truncatechars:45 }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="not-provided">
+                                    Not provided
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Date -->
+
+                        <td>
+
+                            <div class="date-info">
+
+                                <strong>
+                                    {{ customer.created_at|date:"d M Y" }}
+                                </strong>
+
+                                <span>
+                                    {{ customer.created_at|date:"h:i A" }}
+                                </span>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- Actions -->
+
+                        <td>
+
+                            <div class="action-buttons">
+
+                                <a
+                                    href="{% url 'edit_customer' customer.id %}"
+                                    class="edit-btn"
+                                    title="Edit Customer"
+                                >
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+
+                                <a
+                                    href="{% url 'delete_customer' customer.id %}"
+                                    class="delete-btn"
+                                    title="Delete Customer"
+                                    onclick="return confirm('Are you sure you want to delete this customer?');"
+                                >
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        {% else %}
+
+        <!-- Empty State -->
+
+        <div class="empty-state">
+
+            <div class="empty-icon">
+                <i class="fa-solid fa-users"></i>
+            </div>
+
+            <h3>
+                No customers found
+            </h3>
+
+            <p>
+
+                {% if search %}
+
+                    Try changing your search.
+
+                {% else %}
+
+                    Add your first customer to get started.
+
+                {% endif %}
+
+            </p>
+
+
+            {% if not search %}
+
+            <a
+                href="{% url 'add_customer' %}"
+                class="empty-btn"
+            >
+                <i class="fa-solid fa-user-plus"></i>
+                Add Customer
+            </a>
+
+            {% endif %}
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<style>
+
+/* ==================================================
+   PAGE
+================================================== */
+
+.customers-page {
+    max-width: 1400px;
+    margin: 0 auto 30px;
+}
+
+
+/* ==================================================
+   HEADER
+================================================== */
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 22px;
+}
+
+.page-header h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 28px;
+}
+
+.page-header p {
+    margin: 6px 0 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.add-customer-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 17px;
+    border-radius: 8px;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.add-customer-btn:hover {
+    background: #1d4ed8;
+}
+
+
+/* ==================================================
+   FILTER
+================================================== */
+
+.filter-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 13px;
+    padding: 18px;
+    margin-bottom: 20px;
+}
+
+.filter-form {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.search-box {
+    position: relative;
+    flex: 1;
+}
+
+.search-box i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+.search-box input {
+    width: 100%;
+    height: 44px;
+    box-sizing: border-box;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0 14px 0 40px;
+    color: #334155;
+    font-size: 13px;
+    outline: none;
+}
+
+.search-box input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .10);
+}
+
+.filter-btn,
+.clear-btn {
+    height: 44px;
+    padding: 0 17px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.filter-btn {
+    border: none;
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+}
+
+.filter-btn:hover {
+    background: #1d4ed8;
+}
+
+.clear-btn {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+
+/* ==================================================
+   TABLE
+================================================== */
+
+.table-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, .04);
+}
+
+.table-header {
+    padding: 20px 22px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.table-header h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 18px;
+}
+
+.table-header p {
+    margin: 5px 0 0;
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    min-width: 1050px;
+    border-collapse: collapse;
+}
+
+thead {
+    background: #f8fafc;
+}
+
+th {
+    padding: 13px 15px;
+    color: #64748b;
+    text-align: left;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    white-space: nowrap;
+}
+
+td {
+    padding: 15px;
+    border-top: 1px solid #f1f5f9;
+    color: #334155;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+tr:hover td {
+    background: #f8fafc;
+}
+
+
+/* ==================================================
+   CUSTOMER
+================================================== */
+
+.customer-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.customer-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 13px;
+}
+
+.customer-info strong {
+    display: block;
+    color: #0f172a;
+    font-size: 12px;
+}
+
+.customer-info span {
+    display: block;
+    margin-top: 3px;
+    color: #94a3b8;
+    font-size: 10px;
+}
+
+
+/* ==================================================
+   CONTACT
+================================================== */
+
+.contact-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #475569;
+}
+
+.contact-info i {
+    color: #94a3b8;
+}
+
+.not-provided {
+    color: #94a3b8;
+    font-style: italic;
+    font-size: 11px;
+}
+
+.address-text {
+    color: #475569;
+}
+
+
+/* ==================================================
+   DATE
+================================================== */
+
+.date-info strong {
+    display: block;
+    color: #334155;
+    font-size: 11px;
+}
+
+.date-info span {
+    display: block;
+    margin-top: 3px;
+    color: #94a3b8;
+    font-size: 10px;
+}
+
+
+/* ==================================================
+   ACTIONS
+================================================== */
+
+.action-buttons {
+    display: flex;
+    gap: 7px;
+}
+
+.edit-btn,
+.delete-btn {
+    width: 33px;
+    height: 33px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 11px;
+}
+
+.edit-btn {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.edit-btn:hover {
+    background: #dbeafe;
+}
+
+.delete-btn {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.delete-btn:hover {
+    background: #fee2e2;
+}
+
+
+/* ==================================================
+   EMPTY
+================================================== */
+
+.empty-state {
+    text-align: center;
+    padding: 70px 20px;
+}
+
+.empty-icon {
+    width: 65px;
+    height: 65px;
+    margin: 0 auto 15px;
+    border-radius: 15px;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 25px;
+}
+
+.empty-state h3 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 18px;
+}
+
+.empty-state p {
+    margin: 8px 0 20px;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.empty-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 11px 17px;
+    border-radius: 8px;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+
+/* ==================================================
+   RESPONSIVE
+================================================== */
+
+@media (max-width: 700px) {
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .add-customer-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .filter-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-box {
+        width: 100%;
+    }
+
+    .filter-btn,
+    .clear-btn {
+        width: 100%;
+    }
+
+}
+
+</style>
+
+{% endblock %}

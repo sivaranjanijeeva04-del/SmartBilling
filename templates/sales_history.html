@@ -1,0 +1,966 @@
+{% extends "base.html" %}
+
+{% block title %}Sales History{% endblock %}
+
+{% block page_title %}Sales History{% endblock %}
+
+{% block content %}
+
+<div class="sales-page">
+
+    <!-- Header -->
+
+    <div class="page-header">
+
+        <div>
+            <h1>Sales History</h1>
+
+            <p>
+                View and track all completed and outstanding sales.
+            </p>
+        </div>
+
+        <a href="{% url 'add_invoice' %}" class="new-sale-btn">
+            <i class="fa-solid fa-plus"></i>
+            Create Invoice
+        </a>
+
+    </div>
+
+
+    <!-- Summary -->
+
+    <div class="summary-card">
+
+        <div class="summary-left">
+
+            <div class="summary-icon">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+
+            <div>
+                <span>Filtered Sales</span>
+
+                <h2>
+                    ₹{{ total_sales|floatformat:2 }}
+                </h2>
+            </div>
+
+        </div>
+
+        <div class="summary-right">
+
+            <span>
+                {{ sales|length }} sale(s)
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- Search & Filter -->
+
+    <div class="filter-card">
+
+        <form method="GET" class="filter-form">
+
+            <!-- Search -->
+
+            <div class="search-box">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ search }}"
+                    placeholder="Search invoice or customer..."
+                >
+
+            </div>
+
+
+            <!-- Status -->
+
+            <select
+                name="status"
+                class="status-select"
+            >
+
+                <option value="">
+                    All Status
+                </option>
+
+                <option
+                    value="Paid"
+                    {% if status == "Paid" %}selected{% endif %}
+                >
+                    Paid
+                </option>
+
+                <option
+                    value="Partial"
+                    {% if status == "Partial" %}selected{% endif %}
+                >
+                    Partial
+                </option>
+
+                <option
+                    value="Pending"
+                    {% if status == "Pending" %}selected{% endif %}
+                >
+                    Pending
+                </option>
+
+            </select>
+
+
+            <!-- Filter -->
+
+            <button
+                type="submit"
+                class="filter-btn"
+            >
+                <i class="fa-solid fa-filter"></i>
+                Filter
+            </button>
+
+
+            <!-- Clear -->
+
+            <a
+                href="{% url 'sales_history' %}"
+                class="clear-btn"
+            >
+                Clear
+            </a>
+
+        </form>
+
+    </div>
+
+
+    <!-- Sales Table -->
+
+    <div class="table-card">
+
+        <div class="table-header">
+
+            <div>
+
+                <h2>
+                    Sales Transactions
+                </h2>
+
+                <p>
+                    Complete invoice sales history.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        {% if sales %}
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Invoice
+                        </th>
+
+                        <th>
+                            Customer
+                        </th>
+
+                        <th>
+                            Items
+                        </th>
+
+                        <th>
+                            Subtotal
+                        </th>
+
+                        <th>
+                            Discount
+                        </th>
+
+                        <th>
+                            Tax
+                        </th>
+
+                        <th>
+                            Grand Total
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th>
+                            Date
+                        </th>
+
+                        <th>
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for sale in sales %}
+
+                    <tr>
+
+                        <!-- Invoice -->
+
+                        <td>
+
+                            <a
+                                href="{% url 'invoice_detail' sale.id %}"
+                                class="invoice-link"
+                            >
+                                {{ sale.invoice_number }}
+                            </a>
+
+                        </td>
+
+
+                        <!-- Customer -->
+
+                        <td>
+
+                            <div class="customer-info">
+
+                                <div class="customer-icon">
+                                    <i class="fa-solid fa-user"></i>
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        {{ sale.customer.name }}
+                                    </strong>
+
+                                    {% if sale.customer.phone %}
+
+                                    <span>
+                                        {{ sale.customer.phone }}
+                                    </span>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- Items -->
+
+                        <td>
+
+                            <span class="item-count">
+
+                                {{ sale.items.all|length }}
+
+                                item(s)
+
+                            </span>
+
+                        </td>
+
+
+                        <!-- Subtotal -->
+
+                        <td>
+
+                            ₹{{ sale.subtotal|floatformat:2 }}
+
+                        </td>
+
+
+                        <!-- Discount -->
+
+                        <td>
+
+                            {% if sale.discount > 0 %}
+
+                                <span class="discount-value">
+                                    - ₹{{ sale.discount|floatformat:2 }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="no-discount">
+                                    ₹0.00
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Tax -->
+
+                        <td>
+
+                            ₹{{ sale.tax|floatformat:2 }}
+
+                        </td>
+
+
+                        <!-- Grand Total -->
+
+                        <td>
+
+                            <strong class="grand-total">
+                                ₹{{ sale.grand_total|floatformat:2 }}
+                            </strong>
+
+                        </td>
+
+
+                        <!-- Status -->
+
+                        <td>
+
+                            {% if sale.payment_status == "Paid" %}
+
+                                <span class="status-badge paid">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    Paid
+                                </span>
+
+                            {% elif sale.payment_status == "Partial" %}
+
+                                <span class="status-badge partial">
+                                    <i class="fa-solid fa-clock"></i>
+                                    Partial
+                                </span>
+
+                            {% else %}
+
+                                <span class="status-badge pending">
+                                    <i class="fa-solid fa-circle-exclamation"></i>
+                                    Pending
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Date -->
+
+                        <td>
+
+                            <div class="date-info">
+
+                                <strong>
+                                    {{ sale.invoice_date|date:"d M Y" }}
+                                </strong>
+
+                                <span>
+                                    {{ sale.invoice_date|date:"h:i A" }}
+                                </span>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- Action -->
+
+                        <td>
+
+                            <a
+                                href="{% url 'invoice_detail' sale.id %}"
+                                class="view-btn"
+                                title="View Invoice"
+                            >
+                                <i class="fa-solid fa-eye"></i>
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <!-- Empty State -->
+
+        <div class="empty-state">
+
+            <div class="empty-icon">
+                <i class="fa-solid fa-chart-column"></i>
+            </div>
+
+            <h3>
+                No sales found
+            </h3>
+
+            <p>
+
+                {% if search or status %}
+
+                    Try changing your search or filter.
+
+                {% else %}
+
+                    Create your first invoice to see sales history.
+
+                {% endif %}
+
+            </p>
+
+
+            {% if not search and not status %}
+
+            <a
+                href="{% url 'add_invoice' %}"
+                class="empty-btn"
+            >
+                <i class="fa-solid fa-plus"></i>
+                Create Invoice
+            </a>
+
+            {% endif %}
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<style>
+
+/* ==================================================
+   PAGE
+================================================== */
+
+.sales-page {
+    max-width: 1450px;
+    margin: auto;
+}
+
+
+/* ==================================================
+   HEADER
+================================================== */
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 22px;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 28px;
+    color: #0f172a;
+}
+
+.page-header p {
+    margin: 6px 0 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.new-sale-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 17px;
+    border-radius: 8px;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.new-sale-btn:hover {
+    background: #1d4ed8;
+}
+
+
+/* ==================================================
+   SUMMARY
+================================================== */
+
+.summary-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 5px 18px rgba(15, 23, 42, .04);
+}
+
+.summary-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.summary-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 19px;
+}
+
+.summary-left span {
+    display: block;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.summary-left h2 {
+    margin: 4px 0 0;
+    color: #0f172a;
+    font-size: 23px;
+}
+
+.summary-right {
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+
+/* ==================================================
+   FILTER
+================================================== */
+
+.filter-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 13px;
+    padding: 18px;
+    margin-bottom: 20px;
+}
+
+.filter-form {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.search-box {
+    position: relative;
+    flex: 1;
+    min-width: 250px;
+}
+
+.search-box i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+.search-box input,
+.status-select {
+    height: 44px;
+    box-sizing: border-box;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: white;
+    outline: none;
+    font-size: 13px;
+    color: #334155;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0 14px 0 40px;
+}
+
+.status-select {
+    min-width: 170px;
+    padding: 0 12px;
+}
+
+.search-box input:focus,
+.status-select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .10);
+}
+
+.filter-btn,
+.clear-btn {
+    height: 44px;
+    padding: 0 17px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.filter-btn {
+    border: none;
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+}
+
+.filter-btn:hover {
+    background: #1d4ed8;
+}
+
+.clear-btn {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.clear-btn:hover {
+    background: #e2e8f0;
+}
+
+
+/* ==================================================
+   TABLE
+================================================== */
+
+.table-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, .04);
+}
+
+.table-header {
+    padding: 20px 22px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.table-header h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 18px;
+}
+
+.table-header p {
+    margin: 5px 0 0;
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    min-width: 1250px;
+    border-collapse: collapse;
+}
+
+thead {
+    background: #f8fafc;
+}
+
+th {
+    padding: 13px 15px;
+    text-align: left;
+    color: #64748b;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    white-space: nowrap;
+}
+
+td {
+    padding: 15px;
+    border-top: 1px solid #f1f5f9;
+    color: #334155;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+tr:hover td {
+    background: #f8fafc;
+}
+
+
+/* ==================================================
+   INVOICE
+================================================== */
+
+.invoice-link {
+    color: #2563eb;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.invoice-link:hover {
+    text-decoration: underline;
+}
+
+
+/* ==================================================
+   CUSTOMER
+================================================== */
+
+.customer-info {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.customer-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.customer-info strong {
+    display: block;
+    color: #0f172a;
+    font-size: 12px;
+}
+
+.customer-info span {
+    display: block;
+    margin-top: 3px;
+    color: #94a3b8;
+    font-size: 10px;
+}
+
+
+/* ==================================================
+   ITEMS
+================================================== */
+
+.item-count {
+    color: #64748b;
+    font-size: 11px;
+}
+
+
+/* ==================================================
+   AMOUNTS
+================================================== */
+
+.grand-total {
+    color: #0f172a;
+    font-size: 13px;
+}
+
+.discount-value {
+    color: #16a34a;
+    font-weight: 600;
+}
+
+.no-discount {
+    color: #94a3b8;
+}
+
+
+/* ==================================================
+   STATUS
+================================================== */
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.status-badge.paid {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.status-badge.partial {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.status-badge.pending {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+
+/* ==================================================
+   DATE
+================================================== */
+
+.date-info strong {
+    display: block;
+    color: #334155;
+    font-size: 11px;
+}
+
+.date-info span {
+    display: block;
+    margin-top: 3px;
+    color: #94a3b8;
+    font-size: 10px;
+}
+
+
+/* ==================================================
+   VIEW BUTTON
+================================================== */
+
+.view-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #eff6ff;
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.view-btn:hover {
+    background: #dbeafe;
+}
+
+
+/* ==================================================
+   EMPTY STATE
+================================================== */
+
+.empty-state {
+    text-align: center;
+    padding: 70px 20px;
+}
+
+.empty-icon {
+    width: 65px;
+    height: 65px;
+    margin: 0 auto 15px;
+    border-radius: 15px;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 25px;
+}
+
+.empty-state h3 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 18px;
+}
+
+.empty-state p {
+    margin: 8px 0 20px;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.empty-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 11px 17px;
+    border-radius: 8px;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.empty-btn:hover {
+    background: #1d4ed8;
+}
+
+
+/* ==================================================
+   RESPONSIVE
+================================================== */
+
+@media (max-width: 800px) {
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .new-sale-btn {
+        width: 100%;
+    }
+
+    .summary-card {
+        align-items: flex-start;
+        gap: 10px;
+        flex-direction: column;
+    }
+
+    .search-box {
+        flex-basis: 100%;
+    }
+
+    .status-select,
+    .filter-btn,
+    .clear-btn {
+        width: 100%;
+    }
+
+}
+
+</style>
+
+{% endblock %}
